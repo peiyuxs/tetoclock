@@ -5,4 +5,10 @@ profiles:
       - platform: arduino:zephyr (1.0.0)
     libraries:
       # Add your Arduino libraries here as you need them
-      - LiquidCrystal_I2C
+      - LiquidCrystal_I2C (2.0.0)
+      - Arduino_RouterBridge (0.4.3)
+      - dependency: Arduino_RPClite (0.3.0)
+      - dependency: MsgPack (0.4.2)
+      - dependency: ArxContainer (0.7.0)
+      - dependency: ArxTypeTraits (0.3.2)
+      - dependency: DebugLog (0.8.4)

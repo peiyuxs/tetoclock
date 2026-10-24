@@ -2,7 +2,9 @@
 __pycache__/
 *.pyc
 venv/
+.venv/
 .env
+python/generated/
 
 # VS Code
 .vscode/

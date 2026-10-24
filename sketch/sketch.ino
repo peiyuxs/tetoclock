@@ -1,21 +1,18 @@
-// put function declarations here:
-int myFunction(int, int);
-
 void setup() {
-  // put your setup code here, to run once:
-  // Initialize the built-in LED pin as an output
   pinMode(LED_BUILTIN, OUTPUT);
+  Serial.begin(115200);
+  Serial.println("Teto'Clock safe board test starting.");
+  Serial.println("Speaker output is disabled. Keep the speaker disconnected.");
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  digitalWrite(LED_BUILTIN, HIGH); // Turn the LED on
-  delay(1000);                     // Wait for 1 second
-  digitalWrite(LED_BUILTIN, LOW);  // Turn the LED off
-  delay(1000);                     // Wait for 1 second
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  Serial.println("LED test: three flashes.");
+  for (int flash = 0; flash < 3; flash++) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(250);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(250);
+  }
+  Serial.println("Test complete. Repeating in 2 seconds.");
+  delay(2000);
 }
