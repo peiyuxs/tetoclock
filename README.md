@@ -43,7 +43,7 @@ The script writes the audio file to `python/generated/teto_test.mp3`. Change `TE
 
 ## Safe Uno Q Board Test
 
-The sketch in `sketch/sketch.ino` is currently an LED-and-Serial test only. It does not drive a speaker or play tones. Keep the salvaged speaker disconnected while running this test.
+The sketch in `sketch/sketch.ino` is an LED-and-Serial test. It does not drive a speaker. The optional `python/pc_audio_test.py` script listens for each LED-flash message and plays a short tone on the Windows computer. Keep the salvaged speaker disconnected; this tests the computer audio and serial timing, not the salvaged speaker.
 
 In Git Bash, from the repository root, compile and upload with:
 
@@ -51,7 +51,23 @@ In Git Bash, from the repository root, compile and upload with:
 arduino-cli compile --profile uno_q --upload --port COM6 sketch
 ```
 
-Replace `COM6` with the Uno Q's port as shown by `arduino-cli board list`. The built-in LED flashes three times, pauses, and repeats. The sketch also prints status messages at **115200 baud**. If the Arduino CLI Serial Monitor cannot open the Uno Q port, use Arduino IDE 2's Serial Monitor instead.
+Replace `COM6` with the Uno Q's port as shown by `arduino-cli board list`. The built-in LED flashes three times, pauses, and repeats. The sketch sends a `FLASH` message at **115200 baud** during each flash.
+
+To hear a matching tone from the Windows computer:
+
+1. Close Arduino IDE Serial Monitor or any other program using the board's COM port. A serial port can only be opened by one program at a time.
+2. Activate the project's Python virtual environment and install dependencies if you have not already:
+   ```bash
+   source .venv/Scripts/activate
+   python -m pip install -r python/requirements.txt
+   ```
+3. Run the PC audio listener, replacing `COM6` if your board uses a different port:
+   ```bash
+   python python/pc_audio_test.py --port COM6
+   ```
+4. The script opens the serial port (which may restart the sketch), then plays a brief 880 Hz tone through the computer for each `FLASH` message. Raise the computer volume to a comfortable level. Press **Ctrl+C** in Git Bash to stop.
+
+If no tone plays, check that the correct COM port is selected, the computer's audio is not muted, the sketch is uploaded, and no other app has the port open. This test plays a generated test tone on the PC; it does not test the salvaged speaker or play ElevenLabs speech.
 
 **Speaker safety:** A series resistor does not make it safe to connect an unidentified speaker directly to a Uno Q GPIO pin. A resistor does not provide the amplifier function or guarantee that either the speaker or the GPIO stays within its electrical limits. Do not connect the speaker to pin 8, GND, 3.3 V, or 5 V. Only test it through an amplifier confirmed to support the speaker's impedance and power requirements; connect the speaker only to the amplifier's speaker outputs, following that amplifier's documentation. Until the speaker and amplifier are identified, use this LED-only sketch and leave the speaker disconnected.
 

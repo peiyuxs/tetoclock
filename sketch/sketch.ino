@@ -6,8 +6,9 @@ void setup() {
 }
 
 void loop() {
-  Serial.println("LED test: three flashes.");
+  Serial.println("LED and PC audio test: three flashes.");
   for (int flash = 0; flash < 3; flash++) {
+    Serial.println("FLASH");
     digitalWrite(LED_BUILTIN, HIGH);
     delay(250);
     digitalWrite(LED_BUILTIN, LOW);
