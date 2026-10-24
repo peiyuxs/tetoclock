@@ -1,0 +1,8 @@
+profiles:
+  uno_q:
+    fqbn: arduino:zephyr:unoq
+    platforms:
+      - platform: arduino:zephyr (1.0.0)
+    libraries:
+      # Add your Arduino libraries here as you need them
+      - LiquidCrystal_I2C
