@@ -42,6 +42,10 @@ def process_request() -> None:
             Bridge.call("start_outputs", duration_ms)
         elif action == "STOP" and len(fields) == 2:
             Bridge.call("stop_outputs")
+        elif action == "POLL" and len(fields) == 2:
+            dismissed = Bridge.call("consume_alarm_dismissed")
+            acknowledge(request_id, "DISMISSED" if dismissed else "IDLE")
+            return
         else:
             raise ValueError("unknown action or invalid arguments")
     except (OSError, ValueError) as error:

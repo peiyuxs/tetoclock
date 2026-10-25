@@ -177,7 +177,7 @@ class UnoQBridge:
                 f"{details or f'exit code {result.returncode}'}"
             )
 
-    def send_command(self, action: str, duration_ms: int | None = None) -> None:
+    def send_command(self, action: str, duration_ms: int | None = None) -> str:
         """Send a request and wait for its matching App Lab acknowledgement."""
         request_id = uuid.uuid4().hex
         fields = [request_id, action]
@@ -199,9 +199,10 @@ class UnoQBridge:
             ).stdout.strip()
             if response.startswith(f"{request_id} "):
                 status = response[len(request_id) + 1 :]
-                if status != "OK":
+                valid_statuses = {"IDLE", "DISMISSED"} if action == "POLL" else {"OK"}
+                if status not in valid_statuses:
                     raise RuntimeError(f"Uno Q Bridge returned an error: {status}")
-                return
+                return status
             time.sleep(0.2)
 
         logs = self._run(
