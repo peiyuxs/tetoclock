@@ -1,21 +1,21 @@
-// put function declarations here:
-int myFunction(int, int);
-
 void setup() {
-  // put your setup code here, to run once:
-  // Initialize the built-in LED pin as an output
   pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+  Serial.begin(115200);
+  Serial.println("Teto'Clock speech indicator ready.");
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  digitalWrite(LED_BUILTIN, HIGH); // Turn the LED on
-  delay(1000);                     // Wait for 1 second
-  digitalWrite(LED_BUILTIN, LOW);  // Turn the LED off
-  delay(1000);                     // Wait for 1 second
-}
+  if (Serial.available() > 0) {
+    String command = Serial.readStringUntil('\n');
+    command.trim();
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+    if (command == "PING") {
+      Serial.println("READY");
+    } else if (command == "SPEAKING") {
+      digitalWrite(LED_BUILTIN, HIGH);
+    } else if (command == "IDLE") {
+      digitalWrite(LED_BUILTIN, LOW);
+    }
+  }
 }
