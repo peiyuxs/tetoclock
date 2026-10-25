@@ -44,7 +44,7 @@ def process_request() -> None:
             Bridge.call("stop_outputs")
         else:
             raise ValueError("unknown action or invalid arguments")
-    except Exception as error:
+    except (OSError, ValueError) as error:
         message = f"ERROR {type(error).__name__}: {error}".replace("\n", " ")
         print(f"Could not forward TETO'Clock request: {message}")
         acknowledge(request_id, message)

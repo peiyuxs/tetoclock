@@ -1,114 +1,190 @@
 # TETO'Clock
 
-TETO'Clock is an Arduino Uno Q and Python prototype for generating a short ElevenLabs voice clip, playing it on a Windows PC, and synchronizing the Uno Q's built-in LED and a motor-driver control output with playback.
+TETO'Clock is a Windows PC + Arduino Uno Q test project. ElevenLabs generates a short voice clip, the PC plays it, and the Uno Q's built-in LED and digital pin 3 are synchronized with the clip.
 
-The salvaged laptop speaker is not used by this test. Digital pin 3 is a control signal only: do not connect a bare speaker or motor/fan directly to the Uno Q. A motor requires a correctly rated driver and supply. See [Hardware safety](#hardware-safety).
+**The salvaged speaker is not used in this test.** Pin 3 is a logic control output, not a motor power output. Read [Hardware and safety](#hardware-and-safety) before connecting anything.
+
+## What happens when you run the test
+
+1. Python requests speech from ElevenLabs and saves it as a WAV file on the PC.
+2. The PC uses ADB over the USB connection to start a small Python app on the Uno Q.
+3. That app sends start/stop requests through Arduino RouterBridge to the sketch.
+4. The PC plays the WAV while the Uno Q lights its built-in LED and sets pin 3 HIGH.
+5. At playback end, the PC sends a stop request. The sketch also has a 120-second automatic shutoff.
+
+COM6 (or another COM port) is used to upload the sketch. It is **not** used to send speech commands. This is why the old `READY` serial handshake did not work.
 
 ## Project files
 
-- `python/elevenlabs_api.py` contains the ElevenLabs API client logic. It reads credentials from `.env`, requests 22.05 kHz PCM audio, writes a mono 16-bit WAV, and returns the clip duration.
-- `python/main.py` is the API-only command-line entry point. It generates a clip without connecting to an Arduino or playing audio.
-- `python/tests/speech_test.py` is the Windows integration runner. It generates a clip, starts the Uno Q App Lab bridge app, sends the playback duration over ADB, plays the WAV through the PC, then sends a stop command.
-- `python/requirements.txt` lists the Python packages.
-- `sketch/sketch.ino` contains the board-side pin behavior. It registers `start_outputs` and `stop_outputs` with Arduino RouterBridge, controls the built-in LED and pin 3, and automatically turns outputs off after at most 120 seconds.
-- `sketch/sketch.yaml` is the Arduino CLI build profile for the Uno Q and pins its platform and library dependencies.
-- `board_app/` is a small Python-only Arduino App Lab project deployed to the Uno Q by the integration runner. It receives start/stop requests from the PC and forwards them through RouterBridge; GPIO pin logic remains in `sketch/sketch.ino`.
-- `.env.example` shows the expected ElevenLabs environment-variable names. Copy those names into the private project-root `.env` file.
+| File or folder | Purpose |
+| --- | --- |
+| `python/elevenlabs_api.py` | ElevenLabs client, WAV creation, and clip-duration calculation. |
+| `python/main.py` | Generate a WAV only; does not connect to the board or play audio. |
+| `python/uno_q_bridge.py` | Locate ADB, deploy the board-side app, and send/confirm Uno Q commands. |
+| `python/tests/speech_test.py` | Coordinate speech generation, PC playback, and the Uno Q bridge. |
+| `python/requirements.txt` | Python packages installed in the existing `.venv`. |
+| `board_app/` | The App Lab Python bridge app copied to the Uno Q when the test runs. |
+| `sketch/sketch.ino` | All GPIO behavior: LED, pin 3, bridge commands, and timed shutoff. |
+| `sketch/sketch.yaml` | Uno Q CLI build profile and RouterBridge-compatible core/library versions. |
+| `.env.example` | Template for the required ElevenLabs settings. |
+| `.env` | Your private API key and voice ID. Keep this local; it is ignored by Git. |
 
-The old, empty root-level `app.yaml` is still removed. The valid `board_app/app.yaml` manifest is used only for the Uno Q's App Lab bridge app. `sketch/sketch.yaml` pins the Arduino CLI build to the Uno Q platform version bundled with the board's installed Linux image so its RouterBridge protocol matches.
+The empty root-level `app.yaml` was removed. `board_app/app.yaml` is the valid manifest for the separate App Lab bridge app.
 
-## Requirements
+## Before starting
 
-- Windows 10/11 with Git Bash.
-- Python 3.10 or later available via the Windows `py` launcher.
-- Arduino CLI, its bundled ADB tool, and the Uno Q connected by a USB data cable.
-- An ElevenLabs API key and a voice ID for a voice you are allowed to use.
-- Computer speakers or headphones for PC playback.
+You will need:
 
-## Initial setup
+- Windows 10 or 11, VS Code, and Git Bash.
+- The existing project `.venv` (the commands below use `./.venv/bin/python.exe`).
+- Arduino CLI.
+- An Arduino Uno Q connected to the PC with a USB data cable.
+- An ElevenLabs API key and a voice ID you are allowed to use.
+- Working PC speakers or headphones.
 
-Run commands from Git Bash in the repository root. This project uses the existing `.venv`; do not create a second environment:
+If Arduino CLI is not installed, follow the [official Arduino CLI installation guide](https://arduino.github.io/arduino-cli/installation/) for Windows, then reopen Git Bash. From the repository root, confirm the tools and board are available:
+
+```bash
+arduino-cli version
+arduino-cli board list
+```
+
+The board list should show an Arduino UNO Q and a port such as `COM6`. Replace `COM6` in later commands with the port shown on your PC.
+
+## One-time Python and ElevenLabs setup
+
+Run every command in this guide from **Git Bash**, with the current directory at the repository root. Check it with:
+
+```bash
+pwd
+```
+
+Install the project dependencies into the existing environment:
 
 ```bash
 ./.venv/bin/python.exe -m pip install -r python/requirements.txt
 ```
 
-Create or edit the project-root `.env` file and add your own credentials:
+If that command says the file cannot be found, check that you are at the repository root and that `.venv/bin/python.exe` exists. Do not create another virtual environment if this existing one works.
+
+Create your private `.env` from the template if you do not already have one:
+
+```bash
+cp -n .env.example .env
+```
+
+Open `.env` in VS Code and replace the empty values with your own credentials:
 
 ```text
 ELEVENLABS_API_KEY=your_elevenlabs_api_key
 ELEVENLABS_VOICE_ID=your_voice_id
 ```
 
-Keep `.env` private; it is ignored by Git. Never paste the API key into source code or commit it.
+Save the file. Do not share or commit it. If `.env` already exists, edit that file rather than overwriting it.
 
-## Generate speech only
+## Step 1: Generate speech on its own
 
-This calls ElevenLabs and saves a WAV file; it does not open the Arduino port or play audio:
+This checks ElevenLabs and saves the audio; it does not play sound or contact the Uno Q:
 
 ```bash
 ./.venv/bin/python.exe python/main.py
 ```
 
-Pass optional text and an output path:
+By default, the WAV is saved as `python/generated/teto_test.wav`. You can choose the words and output file:
 
 ```bash
 ./.venv/bin/python.exe python/main.py --text "Wake... up!" --output python/generated/custom.wav
 ```
 
-By default, the generated clip is `python/generated/teto_test.wav`. ElevenLabs' 22.05 kHz PCM output is selected because 44.1 kHz PCM was rejected by accounts without Pro access.
+The API requests mono 16-bit PCM at 22.05 kHz and wraps it in a WAV file. This avoids the `pcm_44100` plan restriction encountered with some ElevenLabs accounts.
 
-## Play speech and synchronize the Uno Q
+## Step 2: Compile and upload the Uno Q sketch
 
-1. Leave the salvaged speaker disconnected. Pin 3 must control a suitable external motor driver; do not connect a bare motor/fan directly to the board.
-2. Connect the Uno Q to the PC with a USB data cable. Find its upload port:
+The sketch profile pins the core to version `0.52.0`, matching the RouterBridge version on the Uno Q image used for this project.
+
+1. Connect the Uno Q to the PC using its USB data cable.
+2. Check the upload port:
    ```bash
    arduino-cli board list
    ```
-3. Install the board platform version required to match the Uno Q's installed RouterBridge runtime. Do this once if it is not already installed:
+3. Check the installed core:
+   ```bash
+   arduino-cli core list
+   ```
+   If `arduino:zephyr` version `0.52.0` is not installed, install it once:
    ```bash
    arduino-cli core install arduino:zephyr@0.52.0
    ```
-   Compile and upload the sketch, replacing `COM6` with the port shown on your PC:
+4. Compile and upload. Replace `COM6` with the port from step 2:
    ```bash
    arduino-cli compile --profile uno_q --upload --port COM6 sketch
    ```
-4. Check that ADB sees the board:
-   ```bash
-   adb devices -l
-   ```
-   If `adb` is not on PATH, use the Arduino-bundled executable. In PowerShell, find it with:
-   ```powershell
-   Get-ChildItem "$env:LOCALAPPDATA\Arduino15\packages\arduino\tools\adb" -Filter adb.exe -Recurse
-   ```
-   The script searches that Arduino folder automatically. If more than one ADB device appears, pass the Uno Q's serial with `--adb-serial`.
-5. Set the PC volume to a comfortable level. Run the integration script (no `--port` argument is needed):
+5. Wait for the command to finish successfully before moving on.
+
+## Step 3: Check ADB sees the Uno Q
+
+The integration script finds Arduino's bundled `adb.exe` automatically. To check the connection yourself, locate the Arduino ADB executable in Git Bash:
+
+```bash
+ADB_ROOT="$(cygpath -u "$LOCALAPPDATA")/Arduino15/packages/arduino/tools/adb"
+ADB_EXE="$(find "$ADB_ROOT" -type f -name adb.exe -print -quit)"
+"$ADB_EXE" devices -l
+```
+
+To use the short command `adb` for the rest of this Git Bash window:
+
+```bash
+export PATH="$PATH:$(dirname "$ADB_EXE")"
+adb devices -l
+```
+
+The Uno Q should appear with status `device`. If it shows `unauthorized`, look for an authorization prompt and approve the connection. If it does not appear, check the USB data cable and reconnect the board.
+
+## Step 4: Play speech and synchronize the Uno Q
+
+**Safety check:** leave the salvaged speaker disconnected. Do not connect a bare motor/fan directly to pin 3. See [Hardware and safety](#hardware-and-safety).
+
+1. Set your PC volume to a comfortable level.
+2. Run the integration test:
    ```bash
    ./.venv/bin/python.exe python/tests/speech_test.py
    ```
-   Optionally provide a phrase:
+3. To choose a different phrase:
    ```bash
    ./.venv/bin/python.exe python/tests/speech_test.py --text "Good morning! Time to wake up!"
    ```
-   If multiple devices are connected over ADB, specify the Uno Q serial shown by `adb devices -l`:
+4. If more than one ADB device is connected, specify the Uno Q serial shown by `adb devices -l`:
    ```bash
    ./.venv/bin/python.exe python/tests/speech_test.py --adb-serial 1712448364
    ```
-6. The script copies and starts the Python-only App Lab bridge app on the Uno Q. The PC plays the generated voice; the Uno Q's built-in LED and pin 3 control output turn on for the clip and are explicitly turned off when playback ends. The sketch independently enforces a 120-second maximum-on timeout. The Uno Q's built-in LED is active-low, so the sketch drives it LOW to turn it on. The bridge app is stopped when the test exits.
 
-The integration test no longer uses the COM port or a `READY` text handshake. On the Uno Q, the sketch's `Serial` is routed through Arduino RouterBridge, not used as a regular PC serial command channel. The PC runner uses ADB to reach the Uno Q's Linux side; the board-side App Lab app forwards the timing request to the sketch with RouterBridge. The API-only script at `python/main.py` remains separate from this hardware integration path.
+The script generates the WAV, deploys and starts the App Lab bridge app, plays audio through the PC, sends `STOP` when playback ends, then stops the bridge app. It does not take a `--port` argument. The script also accepts `--adb-path` if ADB is installed somewhere outside Arduino's standard folder.
 
-## Hardware safety
+## Hardware and safety
 
-- **Speaker:** The unidentified salvaged speaker is not connected in this software test. Do not connect it to a GPIO pin, 3.3 V, 5 V, or GND, with or without the 1 MΩ resistor. A resistor does not replace an audio amplifier.
-- **Fan/motor:** Pin 3 is a logic-level control output, not a motor power output. Do not connect a motor directly to pin 3 or an Arduino supply pin. To use a motor, first identify its voltage and current and use a compatible motor driver and suitable motor supply, following the driver's documentation. Do not wire the driver until its exact model, ratings, and pinout are known.
-- Disconnect USB and other power before changing wiring.
+- **Speaker:** the unknown salvaged laptop speaker is not part of this test. Do not connect it directly to a GPIO pin, 3.3 V, 5 V, or GND, with or without a resistor. A speaker requires a correctly rated audio amplifier.
+- **Motor/fan:** pin 3 is a low-current logic signal. Do not connect a motor directly to pin 3 or an Arduino power pin. Use a suitable motor driver and separate, correctly rated motor supply only after identifying the motor and driver ratings and pinout.
+- **If a bare motor is currently wired directly to pin 3, disconnect it before running the integration test.** The script deliberately sets pin 3 HIGH during playback.
+- Disconnect board power before changing wiring.
 
 ## Troubleshooting
 
-- **Missing key or voice ID:** Check the variable names and values in the project-root `.env`.
-- **ElevenLabs authorization/plan error:** The API prints the provider's error details. Confirm the selected output format and that your account allows it.
-- **The old `READY` timeout:** The speech test no longer sends `PING` over COM6. Check `adb devices -l` for the Uno Q control connection instead.
-- **No ADB device:** Check the USB data cable, unlock/authorize the board if prompted, and confirm `adb devices -l` lists it with status `device`.
-- **Bridge app does not start:** Check the Uno Q app logs with `adb shell arduino-app-cli app logs /home/arduino/TetoClockBridge`. Re-upload the sketch using the pinned Uno Q platform version, then rerun the integration script.
-- **No PC sound:** Check the selected Windows output device and volume. The Arduino does not produce the speech audio.
+| Problem | What to check |
+| --- | --- |
+| `adb: command not found` | Expected if ADB is not on Git Bash's `PATH`. Use the full Arduino ADB path above, or add its folder with `export PATH=...`. The Python script searches Arduino's standard ADB location automatically. |
+| `ADB found no connected devices` | Run the ADB `devices -l` command above; check the USB data cable and approve any authorization prompt. |
+| More than one ADB device | Use `--adb-serial` with the Uno Q serial from `adb devices -l`. |
+| `Could not find adb.exe` | Confirm Arduino CLI's ADB tool exists under `%LOCALAPPDATA%\Arduino15\packages\arduino\tools\adb`. Otherwise pass its full path with `--adb-path`. |
+| Missing ElevenLabs key or voice ID | Check that the project-root `.env` has `ELEVENLABS_API_KEY` and `ELEVENLABS_VOICE_ID`. |
+| ElevenLabs authorization or format error | Check the account/voice permissions. The project requests `pcm_22050`; 44.1 kHz PCM was not allowed on the account used during initial testing. |
+| App Lab bridge app fails | With ADB on `PATH`, run `adb shell arduino-app-cli app logs /home/arduino/TetoClockBridge`. Make sure the Uno Q has network access if it needs to download App Lab components. |
+| No audio from PC | Check the Windows output device and volume. Speech audio comes from the PC, not the Uno Q. |
+
+## Code map
+
+- `python/elevenlabs_api.py` requests audio, creates the WAV, and calculates its duration.
+- `python/main.py` is the simple API-only command.
+- `python/uno_q_bridge.py` owns the ADB lookup, deployment, start/stop commands, and acknowledgement timeout.
+- `python/tests/speech_test.py` coordinates the API, Windows audio playback, and board bridge.
+- `board_app/python/main.py` reads PC requests and forwards them to Arduino RouterBridge. It does not set GPIO pins.
+- `sketch/sketch.ino` owns all GPIO actions. `START` turns on the built-in LED and pin 3 and starts the duration timer; `STOP` turns them off. The sketch's 120-second timeout is a fail-safe if the PC disconnects.
