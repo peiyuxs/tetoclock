@@ -31,13 +31,31 @@ In **My TetoClock**, you can:
 The dashboard also presents a **Vibe Prompt** option, but the current PC companion only generates speech from **Exact Words**. Selecting a vibe prompt does not make it speak; use Exact Words for a working voice alarm. The generated voice plays through the companion PC's audio output, while the clock melody and fan run locally on the board.
 
 ## Beginner setup: install the tools
-Use **Windows PowerShell** in VS Code. Whenever these steps say “project folder,” they mean the folder containing `README.md`.
+These instructions use **Git Bash on Windows**. The “project root” is the `tetoclock` folder containing this README. Commands below assume you have opened Git Bash in that folder.
+
+### 0. Get the project
+1. Install [Git for Windows](https://git-scm.com/download/win), which includes Git Bash, and [Visual Studio Code](https://code.visualstudio.com/).
+2. In Git Bash, clone the repository and enter it:
+
+   ```bash
+   git clone https://github.com/peiyuxs/tetoclock.git
+   cd tetoclock
+   ```
+
+   If a teammate has already given you the project folder, open Git Bash in that folder instead; do not clone over existing work.
+3. Confirm you are at the project root:
+
+   ```bash
+   pwd
+   ls
+   ```
+
+   You should see `README.md`, `frontend`, `python`, and `sketch`.
 
 ### 1. Install Node.js and npm
 1. Download the **LTS** Windows installer from [nodejs.org](https://nodejs.org/en/download/). npm is included with Node.js; you do not install it separately.
 2. Run the installer with the default options, including the option to add Node.js to PATH.
-3. Close and reopen VS Code.
-4. Open **Terminal → New Terminal** and check:
+3. Close and reopen Git Bash, then check:
 
    ```powershell
    node --version
@@ -47,50 +65,59 @@ Use **Windows PowerShell** in VS Code. Whenever these steps say “project folde
    Both commands should print version numbers. If PowerShell says that a command is not recognized, restart Windows and try again.
 
 ### 2. Install Python
-1. Download Python 3.10 or later from [python.org/downloads](https://www.python.org/downloads/).
-2. On the first installer screen, select **Add python.exe to PATH**, then install Python.
-3. Close and reopen VS Code. In a new PowerShell terminal, check:
+1. Install Python **3.13** from [python.org/downloads](https://www.python.org/downloads/) or with the Windows Python launcher:
 
-   ```powershell
-   py --version
+   ```bash
+   py install 3.13
    ```
 
-   If `py` is not recognized, reinstall Python and select **Add python.exe to PATH**.
+2. Close and reopen Git Bash, then check:
 
-### 3. Create and use a Python virtual environment
-A virtual environment (`venv`) keeps this project’s Python packages separate from other projects. Open PowerShell in the project folder and run:
+   ```bash
+   py -3.13 --version
+   ```
 
-```powershell
-py -3 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install --upgrade pip
-.\.venv\Scripts\python.exe -m pip install -r python\requirements.txt
+   Python 3.13 is recommended: it has a Windows `pygame` wheel. Newer Python versions may not have one yet. If `py` is not found, install Python from python.org and reopen Git Bash.
+
+### 3. Create the Python environment and install packages
+Run these from the project root. The virtual environment keeps this project's packages separate from your system Python:
+
+```bash
+py -3.13 -m venv .venv313
+./.venv313/Scripts/python.exe -m pip install --upgrade pip
+./.venv313/Scripts/python.exe -m pip install -r python/requirements.txt
 ```
 
-The activation step is optional. You can always use `.venv\Scripts\python.exe` as shown above. If you prefer activation:
+Use `./.venv313/Scripts/python.exe` for the commands in this README. If you close the terminal, no activation is needed.
 
-```powershell
-.\.venv\Scripts\Activate.ps1
-python --version
-```
-
+### 4. Install Arduino CLI and ADB
+1. Install [Arduino CLI](https://arduino.github.io/arduino-cli/installation/) and make sure `arduino-cli` is on PATH. Reopen Git Bash and check:
 If PowerShell refuses to run the activation script, skip activation and keep using `.venv\Scripts\python.exe`. No execution-policy change is needed.
 
 ### 4. Install Arduino CLI and check the board
 1. Follow the official [Arduino CLI installation guide](https://arduino.github.io/arduino-cli/installation/) for Windows.
 2. Connect the UNO Q to the PC with a USB **data** cable, reopen the terminal, and check:
 
-   ```powershell
+   ```bash
    arduino-cli version
-   arduino-cli board list
    ```
 
-3. The sketch profile pins the `arduino:zephyr` 1.0.0 core, `Arduino_RouterBridge` 0.4.3, and `Arduino_RPClite` 0.3.0. Keep these versions together; the older bundled RouterBridge does not provide the alarm event methods the companion needs:
+2. Connect the UNO Q with a USB **data** cable. Install the board core required by the sketch profile:
 
-   ```powershell
+   ```bash
    arduino-cli core install arduino:zephyr@1.0.0
    ```
 
-The board’s upload port (for example, `COM6`) is for uploading the sketch. ADB is used separately to communicate with the UNO Q App Lab application.
+   The profile also pins `Arduino_RouterBridge` 0.4.3 and `Arduino_RPClite` 0.3.0. Arduino CLI installs these when compiling the sketch.
+3. Install [Android SDK Platform-Tools](https://developer.android.com/tools/releases/platform-tools) if `adb` is not already available. Extract the download, then either add its `platform-tools` folder to Windows PATH and reopen Git Bash, or remember the full path to `adb.exe`.
+4. Check the board and ADB:
+
+   ```bash
+   arduino-cli board list
+   adb devices -l
+   ```
+
+   The upload port (such as `COM3`) and ADB serial are different identifiers. ADB should list the UNO Q as `device`, not `unauthorized`; accept any authorization prompt on the board. If Git Bash cannot find `adb`, use the `--adb-path` option with the full `adb.exe` path in the pair/alarm commands below.
 
 ## Environment files: exactly what to keep
 There are **two real credential files** for local development:

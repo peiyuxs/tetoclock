@@ -161,11 +161,11 @@ const unsigned int ALARM_MELODY_STEP_COUNT =
 enum ClockState { SET_CURRENT_TIME, SET_ALARM_TIME };
 ClockState currentMode = SET_CURRENT_TIME;
 
-int hours = 12;
+int hours = 0;
 int minutes = 0;
 int seconds = 0;
-int alarmHours = 6;
-int alarmMinutes = 30;
+int alarmHours = 0;
+int alarmMinutes = 1;
 bool alarmSet = true;
 bool alarmActive = false;
 volatile bool alarmStartedEvent = false;
