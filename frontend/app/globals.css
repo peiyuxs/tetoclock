@@ -119,11 +119,11 @@ button, a, select, input { -webkit-tap-highlight-color: transparent; }
 .section-copy p { margin: 0 0 16px; }
 .text-link { display: inline-flex; align-items: center; gap: 12px; margin-top: 11px; padding-bottom: 6px; color: var(--red-deep); border-bottom: 1px solid #c89b94; font-size: 17px; }
 .text-link:hover { color: var(--red-hot); border-color: var(--red-hot); }
-.project-image { display: block; width: 100%; height: clamp(190px, 23vw, 300px); margin-top: 28px; object-fit: cover; object-position: center 43%; border-radius: 12px; }
+.project-image { display: block; width: 100%; height: clamp(320px, 38vw, 460px); margin-top: 28px; object-fit: cover; object-position: center 55%; border-radius: 12px; }
 .project-stamp { position: relative; display: grid; width: 104px; height: 104px; place-content: center; margin: -24px 0 -49px auto; color: #fff; background: var(--red); border-radius: 50%; font-size: 13px; line-height: 1.1; text-align: center; transform: rotate(12deg); }
 
 .thanks-section { display: grid; min-height: 515px; grid-template-columns: 1fr 1fr; background: var(--wine); }
-.thanks-image { min-height: 515px; background: url("/teto-head-bob.gif") 49% center / cover no-repeat; }
+.thanks-image { min-height: 515px; background: url("/acknowledgements-team.jpg") 49% center / cover no-repeat; }
 .thanks-panel { display: flex; flex-direction: column; justify-content: center; padding: 70px clamp(40px, 8vw, 120px); color: #fff; }
 .section-kicker--light { color: #fff; }
 .section-kicker--light span { color: #db928c; }
@@ -302,7 +302,7 @@ select:disabled, textarea:disabled, input:disabled, button:disabled { cursor: no
   .story-grid { grid-template-columns: 1fr; gap: 27px; margin-top: 46px; }
   .story-grid h2, .gallery-heading h2 { font-size: 57px; }
   .section-copy { font-size: 18px; }
-  .project-image { height: 240px; margin-top: 24px; border-radius: 10px; }
+  .project-image { height: 340px; margin-top: 24px; border-radius: 10px; }
   .project-stamp { width: 80px; height: 80px; margin-top: -18px; margin-bottom: -45px; font-size: 11px; }
   .thanks-section { grid-template-columns: 1fr; }
   .thanks-image { min-height: 320px; background-position: center 42%; }

@@ -63,8 +63,8 @@ export default function HomePage() {
               <h2>Our Project</h2>
               <img
                 className="project-image"
-                src="/teto-head-bob.gif"
-                alt="Kasane Teto beside the TETO'Clock project"
+                src="/teto-clock-project.png"
+                alt="TETO'Clock beside a bed, with Kasane Teto"
               />
             </div>
             <div className="section-copy">
@@ -82,18 +82,18 @@ export default function HomePage() {
         </section>
 
         <section className="thanks-section" id="acknowledgements">
-          <div className="thanks-image" role="img" aria-label="Kasane Teto's head bobbing to the beat" />
+          <div className="thanks-image" role="img" aria-label="The TETO'Clock team posing in front of a colorful mural" />
           <div className="thanks-panel">
             <p className="eyebrow">Acknowledgements</p>
             <h2>Thank you SBUHacks!</h2>
             <p className="thanks-copy">
-              TetoClock is our first hardware hackathon project, and we had so much fun!
+              TetO'Clock is our first hardware hackathon project, and we had so much fun!
               We are so grateful to the MLH and SBUHacks organizing teams for the holistic support and experience.
               We also want to thank all our NJIT friends for their encouragement throughout our hacking!
               <br></br><br></br>
               All hail Kasane Teto!
             </p>
-            <p className="signature">Sincerely, the NJIT TETO&apos;Clock Hackathon Team</p>
+            <p className="signature">&ndash; the NJIT TETO&apos;Clock Hackathon Team</p>
           </div>
         </section>
 
