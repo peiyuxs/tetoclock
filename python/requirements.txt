@@ -1,3 +1,2 @@
 elevenlabs
 python-dotenv
-pyserial
