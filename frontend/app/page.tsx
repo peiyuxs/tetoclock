@@ -39,7 +39,10 @@ export default function HomePage() {
           <div className="hero-content">
             <h1 id="hero-title">
               <span>Full Steam Ahead:</span>
-              <strong>It&apos;s TETO&apos;Clock!</strong>
+              <strong>
+                It&apos;s <img className="hero-wordmark" src="/teto-wordmark-dark.png" alt="TETO&apos;Clock" />!
+                {" "}<img className="hero-pear" src="/teto-logo.png" alt="Pear Teto" />
+              </strong>
             </h1>
             <span className="title-rule" aria-hidden="true" />
             <p className="hero-caption">
@@ -137,7 +140,7 @@ export default function HomePage() {
         <div className="footer-top">
           <Link className="brand footer-brand" href="/">
             <img className="brand-mark" src="/teto-logo.png" alt="" />
-            <span className="brand-name"><span className="brand-name-highlight">TETO</span>&apos;Clock</span>
+            <img className="brand-wordmark" src="/teto-wordmark-dark.png" alt="" />
           </Link>
           <p>Full Steam Ahead: It's TETO'Clock!</p>
           <nav aria-label="Footer navigation">
@@ -149,6 +152,14 @@ export default function HomePage() {
         </div>
         <div className="footer-bottom">
           <span>© 2026  TETO&apos;Clock. TetoNation forever!</span>
+          <a
+            className="font-attribution"
+            href="https://fontstruct.com/fontstructions/show/2704514"
+            target="_blank"
+            rel="noreferrer"
+          >
+            SLTP Regular Font by Kasane Teto on FontStruct
+          </a>
           <a href="#top">Back to top <Icon name="arrow-up" /></a>
         </div>
       </footer>

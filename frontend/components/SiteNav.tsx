@@ -19,7 +19,11 @@ export default function SiteNav() {
     <header className={`site-header${dashboard ? " site-header--solid" : ""}`}>
       <Link className="brand" href="/" aria-label="TETO'Clock home">
         <img className="brand-mark" src="/teto-logo.png" alt="" />
-        <span className="brand-name"><span className="brand-name-highlight">TETO</span>&apos;Clock</span>
+        <img
+          className="brand-wordmark"
+          src={dashboard ? "/teto-wordmark-light.png" : "/teto-wordmark-dark.png"}
+          alt=""
+        />
       </Link>
       <div className="header-actions">
         <nav className="main-nav" aria-label="Main navigation">
