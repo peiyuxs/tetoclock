@@ -92,6 +92,11 @@ Use `./.venv313/Scripts/python.exe` for the commands in this README. If you clos
 
 ### 4. Install Arduino CLI and ADB
 1. Install [Arduino CLI](https://arduino.github.io/arduino-cli/installation/) and make sure `arduino-cli` is on PATH. Reopen Git Bash and check:
+If PowerShell refuses to run the activation script, skip activation and keep using `.venv\Scripts\python.exe`. No execution-policy change is needed.
+
+### 4. Install Arduino CLI and check the board
+1. Follow the official [Arduino CLI installation guide](https://arduino.github.io/arduino-cli/installation/) for Windows.
+2. Connect the UNO Q to the PC with a USB **data** cable, reopen the terminal, and check:
 
    ```bash
    arduino-cli version
