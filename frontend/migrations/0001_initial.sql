@@ -18,13 +18,20 @@ CREATE UNIQUE INDEX IF NOT EXISTS devices_serial_active_uidx
 
 CREATE TABLE IF NOT EXISTS device_settings (
   device_id UUID PRIMARY KEY REFERENCES devices(id),
-  song TEXT NOT NULL DEFAULT 'Teto''s morning mix',
+  song TEXT NOT NULL DEFAULT 'Machine Love',
   message_mode TEXT NOT NULL DEFAULT 'script'
     CHECK (message_mode IN ('script', 'prompt')),
   message TEXT NOT NULL DEFAULT 'Good morning! The train is waiting for you!',
   volume SMALLINT NOT NULL DEFAULT 68 CHECK (volume BETWEEN 0 AND 100),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE device_settings
+  ALTER COLUMN song SET DEFAULT 'Machine Love';
+
+UPDATE device_settings
+SET song = 'Machine Love'
+WHERE song <> 'Machine Love';
 
 CREATE TABLE IF NOT EXISTS device_pairing_codes (
   code_hash TEXT PRIMARY KEY,

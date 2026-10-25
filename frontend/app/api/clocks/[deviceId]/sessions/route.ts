@@ -55,5 +55,8 @@ export async function GET(request: Request, { params }: RouteContext) {
           ORDER BY time DESC
           LIMIT 12
         `;
-  return NextResponse.json({ sessions });
+  return NextResponse.json(
+    { sessions },
+    { headers: { "Cache-Control": "no-store, max-age=0" } },
+  );
 }
