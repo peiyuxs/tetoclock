@@ -199,7 +199,9 @@ class UnoQBridge:
             ).stdout.strip()
             if response.startswith(f"{request_id} "):
                 status = response[len(request_id) + 1 :]
-                valid_statuses = {"IDLE", "DISMISSED"} if action == "POLL" else {"OK"}
+                valid_statuses = (
+                    {"IDLE", "ALARM", "DISMISSED"} if action == "POLL" else {"OK"}
+                )
                 if status not in valid_statuses:
                     raise RuntimeError(f"Uno Q Bridge returned an error: {status}")
                 return status
