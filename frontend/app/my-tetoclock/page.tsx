@@ -7,17 +7,10 @@ export default function DashboardPage() {
       <SiteNav />
       <main className="dashboard-page">
         <div className="dashboard-heading">
-          <div>
-            <p className="eyebrow">Your morning, your rules</p>
-            <h1>My <em>TetoClock</em></h1>
-            <p className="dashboard-intro">
-              Manage each connected clock, its wake-up settings, and your alarm history.
-            </p>
-          </div>
-          <div className="device-status">
-            <span className="status-dot" />
-            <span>Dashboard preview</span>
-          </div>
+          <h1>My <em>TetoClocks</em></h1>
+          <p className="dashboard-intro">
+            Manage your TetoClock settings and alarm history.
+          </p>
         </div>
         <Dashboard />
       </main>

@@ -29,8 +29,10 @@ type AlarmSession = {
 
 type ApiError = { error?: string };
 
+const HISTORY_POLL_INTERVAL_MS = 10_000;
+
 const DEFAULT_SETTINGS: AlarmSettings = {
-  song: "Teto's morning mix",
+  song: "Machine Love",
   messageMode: "script",
   message: "Good morning! The train is waiting for you!",
   volume: 68,
@@ -148,10 +150,16 @@ export default function Dashboard() {
   const [selectedClockId, setSelectedClockId] = useState("");
   const [settings, setSettings] = useState<AlarmSettings>(DEFAULT_SETTINGS);
   const [sessions, setSessions] = useState<AlarmSession[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState("");
+  const [historyUpdatedAt, setHistoryUpdatedAt] = useState<Date | null>(null);
   const [range, setRange] = useState("12 sessions");
   const [clockName, setClockName] = useState("");
+  const [pairingDeviceName, setPairingDeviceName] = useState("");
   const [pairingCode, setPairingCode] = useState("");
+  const [pairingExpiresAt, setPairingExpiresAt] = useState("");
   const [pairingCommand, setPairingCommand] = useState("");
+  const [creatingClock, setCreatingClock] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -204,27 +212,58 @@ export default function Dashboard() {
     if (!selectedClock) {
       setSettings(DEFAULT_SETTINGS);
       setSessions([]);
+      setHistoryLoading(false);
+      setHistoryError("");
+      setHistoryUpdatedAt(null);
       return;
     }
 
-    setSettings(selectedClock.settings ?? DEFAULT_SETTINGS);
+    setSettings({
+      ...(selectedClock.settings ?? DEFAULT_SETTINGS),
+      song: "Machine Love",
+    });
     let active = true;
+    let requestPending = false;
     const query = range === "7 days" ? "?range=7days" : "";
-    void requestJson<{ sessions: AlarmSession[] }>(
-      `/api/clocks/${selectedClock.id}/sessions${query}`,
-    )
-      .then((result) => {
-        if (active) setSessions(result.sessions);
-      })
-      .catch((error: unknown) => {
+    setSessions([]);
+    setHistoryLoading(true);
+    setHistoryError("");
+
+    const refreshHistory = async () => {
+      if (!active || requestPending || document.visibilityState === "hidden") return;
+      requestPending = true;
+      try {
+        const result = await requestJson<{ sessions: AlarmSession[] }>(
+          `/api/clocks/${selectedClock.id}/sessions${query}`,
+        );
         if (active) {
-          setNoticeError(true);
-          setNotice(error instanceof Error ? error.message : "Could not load alarm history.");
+          setSessions(result.sessions);
+          setHistoryError("");
+          setHistoryUpdatedAt(new Date());
         }
-      });
+      } catch (error: unknown) {
+        if (active) {
+          setHistoryError(
+            error instanceof Error ? error.message : "Could not load alarm history.",
+          );
+        }
+      } finally {
+        requestPending = false;
+        if (active) setHistoryLoading(false);
+      }
+    };
+
+    const intervalId = window.setInterval(
+      () => void refreshHistory(),
+      HISTORY_POLL_INTERVAL_MS,
+    );
+    document.addEventListener("visibilitychange", refreshHistory);
+    void refreshHistory();
 
     return () => {
       active = false;
+      window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", refreshHistory);
     };
   }, [selectedClock, range]);
 
@@ -276,24 +315,30 @@ export default function Dashboard() {
   async function addClock(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const name = clockName.trim();
-    if (!name) return;
+    if (!name || creatingClock) return;
+    setCreatingClock(true);
     try {
       const result = await requestJson<{
         pairingCode: string;
+        expiresAt: string;
       }>("/api/clocks", {
         method: "POST",
         body: JSON.stringify({ name }),
       });
+      setPairingDeviceName(name);
       setPairingCode(result.pairingCode);
+      setPairingExpiresAt(result.expiresAt);
       setPairingCommand(
         `python python\\tetoclock_companion.py pair --code ${result.pairingCode} --api-url ${window.location.origin}`,
       );
       setClockName("");
-      setNotice("Pairing code created. Connect the clock within 10 minutes.");
+      setNotice("Your pairing code is ready. Follow the steps below to connect your clock.");
       setNoticeError(false);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Could not create a pairing code.");
       setNoticeError(true);
+    } finally {
+      setCreatingClock(false);
     }
   }
 
@@ -303,7 +348,9 @@ export default function Dashboard() {
     }
     try {
       await requestJson(`/api/clocks/${selectedClock.id}`, { method: "DELETE" });
+      setPairingDeviceName("");
       setPairingCode("");
+      setPairingExpiresAt("");
       setPairingCommand("");
       await loadClocks();
     } catch (error) {
@@ -312,13 +359,13 @@ export default function Dashboard() {
     }
   }
 
-  async function copyPairingCommand() {
+  async function copyToClipboard(value: string, label: string) {
     try {
-      await navigator.clipboard.writeText(pairingCommand);
-      setNotice("Pairing command copied.");
+      await navigator.clipboard.writeText(value);
+      setNotice(`${label} copied.`);
       setNoticeError(false);
     } catch {
-      setNotice("Clipboard access is blocked. Copy the command manually.");
+      setNotice(`Clipboard access is blocked. Select and copy the ${label.toLowerCase()} manually.`);
       setNoticeError(true);
     }
   }
@@ -345,15 +392,14 @@ export default function Dashboard() {
       <section className="settings-card panel">
         <div className="card-heading">
           <div>
-            <p className="eyebrow">Your connected hardware</p>
-            <h2>My clocks</h2>
+              <h2>My Clocks</h2>
           </div>
           <span className="card-icon" aria-hidden="true">✳</span>
         </div>
 
         {clocks.length > 0 && (
           <>
-            <label className="field-label" htmlFor="clock-select">Selected clock</label>
+            <label className="field-label" htmlFor="clock-select">Selected Clock</label>
             <div className="select-wrap">
               <select
                 id="clock-select"
@@ -371,7 +417,7 @@ export default function Dashboard() {
             </p>
             <p className="field-hint">
               {selectedClock?.lastSeenAt
-                ? `Last companion check-in: ${new Date(selectedClock.lastSeenAt).toISOString()}`
+                ? `Last companion check-in: ${new Date(selectedClock.lastSeenAt).toLocaleString()}`
                 : "The companion has not checked in yet."}
             </p>
             <button className="remove-clock-button" type="button" onClick={removeClock}>
@@ -381,7 +427,12 @@ export default function Dashboard() {
         )}
 
         <form className="add-clock-form" onSubmit={addClock}>
-          <label className="field-label" htmlFor="clock-name">Add another clock</label>
+          <label className="field-label" htmlFor="clock-name">
+            {clocks.length ? "Add Another Clock" : "Add Your First Clock"}
+          </label>
+          <p className="field-hint pairing-intro">
+            Give this clock a name so its settings and history are easy to find.
+          </p>
           <div className="add-clock-row">
             <input
               id="clock-name"
@@ -391,26 +442,85 @@ export default function Dashboard() {
               placeholder="e.g. Bedroom clock"
               required
             />
-            <button className="button button--primary" type="submit">Generate pairing code</button>
+            <button className="button button--primary" type="submit" disabled={creatingClock}>
+              {creatingClock ? "Creating Pairing Code…" : "Create Pairing Code"}
+            </button>
           </div>
-          <p className="field-hint">Each connected Uno Q gets its own history and settings.</p>
+          <p className="field-hint">Each Uno Q gets its own settings and alarm history.</p>
         </form>
 
         {pairingCode && (
           <div className="pairing-panel" aria-live="polite">
-            <strong>One-time pairing code</strong>
-            <code className="pairing-code">{pairingCode}</code>
-            <p>On the USB-connected PC, open a terminal in the project folder and run:</p>
-            <code className="companion-command">{pairingCommand}</code>
-            <button className="copy-command-button" type="button" onClick={copyPairingCommand}>
-              Copy pairing command
-            </button>
-            <button className="copy-command-button" type="button" onClick={() => void loadClocks()}>
-              Refresh clock list after pairing
-            </button>
-            <p className="field-hint">
-              The code expires after 10 minutes. Pairing saves the board token in Windows Credential Manager.
-            </p>
+            <div className="pairing-panel-heading">
+              <strong>Connect {pairingDeviceName || "your clock"}</strong>
+              {pairingExpiresAt && (
+                <span className="pairing-expiry">
+                  Code expires at {new Date(pairingExpiresAt).toLocaleTimeString([], {
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </span>
+              )}
+            </div>
+            <ol className="pairing-steps">
+              <li>
+                <span className="pairing-step-number">1</span>
+                <div>
+                  <strong>Connect the clock</strong>
+                  <p>Plug the Uno Q into the Windows PC you use to run its companion.</p>
+                </div>
+              </li>
+              <li>
+                <span className="pairing-step-number">2</span>
+                <div>
+                  <strong>Pair it from that PC</strong>
+                  <p>
+                    The browser cannot access USB/ADB directly, so the Windows companion must complete pairing.
+                    Copy this one-time code; the manual companion instructions below use it to link the board.
+                  </p>
+                  <div className="pairing-code-row">
+                    <code className="pairing-code">{pairingCode}</code>
+                    <button
+                      className="copy-command-button"
+                      type="button"
+                      onClick={() => void copyToClipboard(pairingCode, "Pairing code")}
+                    >
+                      Copy code
+                    </button>
+                  </div>
+                  <details className="pairing-manual">
+                    <summary>Show manual terminal instructions</summary>
+                    <p>Run this from the project folder on the USB-connected PC:</p>
+                    <code className="companion-command">{pairingCommand}</code>
+                    <button
+                      className="copy-command-button"
+                      type="button"
+                      onClick={() => void copyToClipboard(pairingCommand, "Pairing command")}
+                    >
+                      Copy command
+                    </button>
+                  </details>
+                </div>
+              </li>
+              <li>
+                <span className="pairing-step-number">3</span>
+                <div>
+                  <strong>Finish setup</strong>
+                  <p>
+                    After the companion confirms pairing, refresh your clocks. The board token is saved
+                    securely in Windows Credential Manager.
+                  </p>
+                  <button
+                    className="copy-command-button"
+                    type="button"
+                    onClick={() => void loadClocks()}
+                    disabled={loading}
+                  >
+                    {loading ? "Refreshing…" : "Refresh clocks"}
+                  </button>
+                </div>
+              </li>
+            </ol>
           </div>
         )}
 
@@ -419,8 +529,7 @@ export default function Dashboard() {
             <span className="field-label">Run one alarm from the connected PC</span>
             <code className="companion-command">{companionCommand}</code>
             <p className="field-hint">
-              The companion reads this clock&apos;s saved settings, plays the voice clip at your chosen volume,
-              and waits for the physical button.
+              The companion plays the Teto voice according to your saved settings and waits for you to physically stop the alarm.
             </p>
           </div>
         )}
@@ -435,34 +544,25 @@ export default function Dashboard() {
       <section className="settings-card panel">
         <div className="card-heading">
           <div>
-            <p className="eyebrow">Saved per selected clock</p>
-            <h2>Alarm settings</h2>
+            <h2>Alarm Settings</h2>
           </div>
           <span className="card-icon" aria-hidden="true">♫</span>
         </div>
         <form onSubmit={saveSettings}>
-          <label className="field-label" htmlFor="song">Alarm song</label>
+          <label className="field-label" htmlFor="song">Alarm Song</label>
           <div className="select-wrap">
             <select
               id="song"
               value={settings.song}
               disabled={!selectedClock}
-              onChange={(event) => updateSettings({ song: event.target.value })}
             >
-              <option>Teto&apos;s morning mix</option>
-              <option>Triple Baka (morning edit)</option>
-              <option>Showtime! — Teto&apos;s pick</option>
-              <option>Quiet sunrise</option>
+              <option>Machine Love</option>
             </select>
             <span aria-hidden="true">⌄</span>
           </div>
-          <p className="field-hint">
-            The selection is stored with this clock. The current companion prototype plays the Teto voice clip;
-            song audio files are not included yet.
-          </p>
 
           <fieldset className="voice-fieldset" disabled={!selectedClock}>
-            <legend className="field-label">What should Teto say?</legend>
+            <legend className="field-label">What Should Teto Say?</legend>
             <div className="choice-tabs">
               <label className={settings.messageMode === "script" ? "choice-tab choice-tab--active" : "choice-tab"}>
                 <input
@@ -472,7 +572,7 @@ export default function Dashboard() {
                   checked={settings.messageMode === "script"}
                   onChange={() => updateSettings({ messageMode: "script" })}
                 />
-                Exact words
+                Exact Words
               </label>
               <label className={settings.messageMode === "prompt" ? "choice-tab choice-tab--active" : "choice-tab"}>
                 <input
@@ -482,7 +582,7 @@ export default function Dashboard() {
                   checked={settings.messageMode === "prompt"}
                   onChange={() => updateSettings({ messageMode: "prompt" })}
                 />
-                Vibe prompt
+                Vibe Prompt
               </label>
             </div>
             <textarea
@@ -496,13 +596,13 @@ export default function Dashboard() {
             />
             <p className="field-hint">
               {settings.messageMode === "script"
-                ? "Teto will say these exact words."
-                : "Prompts are saved, but prompt-to-speech generation is not connected yet."}
+                ? "Tell Teto exactly what to say."
+                : "Give a general idea or concept of what Teto should say."}
             </p>
           </fieldset>
 
           <div className="volume-heading">
-            <label className="field-label" htmlFor="volume">Alarm volume</label>
+            <label className="field-label" htmlFor="volume">Alarm Volume</label>
             <span className="volume-value">{settings.volume}<small>%</small></span>
           </div>
           <input
@@ -534,8 +634,8 @@ export default function Dashboard() {
       <section className="stats-card panel">
         <div className="card-heading stats-heading">
           <div>
-            <p className="eyebrow">Physical button dismissals</p>
-            <h2>Wake-up history</h2>
+            <h2>Wake-Up History</h2>
+            <span className="stat-note">See how long you take to turn off your TetoClock alarm.</span>
           </div>
           <span className="demo-pill demo-pill--live"><span /> LIVE DATA</span>
         </div>
@@ -543,22 +643,19 @@ export default function Dashboard() {
           <div className="stat-item">
             <span className="stat-label">AVERAGE</span>
             <strong>{stats.average === null ? "—" : formatMinutes(stats.average)}<small>{stats.average === null ? "" : " min"}</small></strong>
-            <span className="stat-note">time to dismiss</span>
           </div>
           <div className="stat-item">
             <span className="stat-label">QUICKEST</span>
             <strong>{stats.quickest === null ? "—" : formatMinutes(stats.quickest)}<small>{stats.quickest === null ? "" : " min"}</small></strong>
-            <span className="stat-note">your best morning</span>
           </div>
           <div className="stat-item">
             <span className="stat-label">IN RANGE</span>
             <strong>{stats.count}<small>×</small></strong>
-            <span className="stat-note">for this clock</span>
           </div>
         </div>
         <div className="chart-heading">
           <div>
-            <h3>Time to get up</h3>
+            <h3>Time To Get Up</h3>
             <p>From alarm start until you press the clock button.</p>
           </div>
           <label className="range-select">
@@ -571,10 +668,22 @@ export default function Dashboard() {
           </label>
         </div>
         <ResponseChart sessions={sessions} />
+        <p
+          className={`history-status${historyError ? " history-status--error" : ""}`}
+          aria-live="polite"
+        >
+          {historyError
+            ? `Could not update wake-up history: ${historyError}`
+            : historyLoading
+              ? "Loading wake-up history…"
+              : historyUpdatedAt
+                ? `Updated ${historyUpdatedAt.toLocaleTimeString()}. Updates every 10 seconds.`
+                : ""}
+        </p>
         <div className="data-note">
           <span aria-hidden="true">ⓘ</span>
           {selectedClock
-            ? `Showing only ${selectedClock.name}. Each saved session is tied to this clock's USB/ADB identity.`
+            ? `Showing only ${selectedClock.name}. Each saved session is connected to your TetoClock's USB/ADB identity.`
             : "Connect a clock and dismiss an alarm to see its time-series history."}
         </div>
       </section>
