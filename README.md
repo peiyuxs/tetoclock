@@ -18,6 +18,7 @@ COM6 (or another COM port) is used to upload the sketch. It is **not** used to s
 
 | File or folder | Purpose |
 | --- | --- |
+| `frontend/` | Client-only Next.js landing page and TetoClock dashboard. |
 | `python/elevenlabs_api.py` | ElevenLabs client, WAV creation, and clip-duration calculation. |
 | `python/main.py` | Generate a WAV only; does not connect to the board or play audio. |
 | `python/uno_q_bridge.py` | Locate ADB, deploy the board-side app, and send/confirm Uno Q commands. |
@@ -30,6 +31,22 @@ COM6 (or another COM port) is used to upload the sketch. It is **not** used to s
 | `.env` | Your private API key and voice ID. Keep this local; it is ignored by Git. |
 
 The empty root-level `app.yaml` was removed. `board_app/app.yaml` is the valid manifest for the separate App Lab bridge app.
+
+## Frontend dashboard
+
+The client-only Next.js site lives in `frontend/`, separate from the Arduino and Python project files. It can be deployed to Vercel from the `frontend/` root directory; the static export is configured in `frontend/next.config.mjs`.
+
+Run it locally with Node.js 18.17 or later:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The site has a landing page at `/` and the settings and wake-up dashboard at `/my-tetoclock`. The dashboard currently uses clearly labeled sample time-series data. It does not connect to TigerData or generate ElevenLabs previews: this repository has no browser-safe data endpoint, alarm-event ingestion, or web speech service. Keep TigerData and ElevenLabs credentials out of client-side code. To show real hardware history, add a secure API service that reads TigerData and returns only the required session timestamps and stop durations; to apply alarm settings, connect them to a device-control service. The current settings are saved locally in the browser.
+
+For the wake-up history, a single line chart is the most useful primary visualization: it makes changes in stop time easy to scan. Pairing it with the average, quickest response, and number of sessions gives context without duplicating the same trend in multiple charts.
 
 ## Before starting
 
