@@ -18,58 +18,43 @@ This repository contains a PlatformIO Arduino project in the `tetoclock` folder,
 
 The PlatformIO configuration is in `tetoclock/platformio.ini`; add project libraries under `lib_deps` and commit that change so teammates get the same dependencies. Build output and local files are excluded by the repository's `.gitignore`.
 
-## ElevenLabs Speech Test
-This project has two separate first tests:
-- `sketch/sketch.ino` blinks the Uno Q's built-in LED and prints status to Serial. It does not drive a speaker.
-- `python/main.py` requests a short spoken test from ElevenLabs and saves the MP3 to `python/generated/teto_test.mp3`.
+## Beginner Teto Voice Test (Windows)
 
-The Python test currently saves the generated audio; it does not send or play the MP3 through the Arduino sketch.
+This test plays a short ElevenLabs voice clip through your **computer's speakers or headphones** and turns on the Arduino's built-in LED during playback. The Arduino and a 1 MΩ resistor cannot play the voice. The breadboard and resistor are not needed for this test.
 
-1. Install Python 3.10 or later.
-2. Create a voice in ElevenLabs, or select a voice you are allowed to use. Copy its voice ID.
-3. Copy the variable names from `.env.example` into the existing project-root `.env` file. Set `ELEVENLABS_API_KEY` to your API key and `ELEVENLABS_VOICE_ID` to the voice ID. Do not commit `.env`.
-4. In Git Bash, from the repository root, create and activate a virtual environment, then install the packages:
-   ```bash
-   python -m venv .venv
-   source .venv/Scripts/activate
-   python -m pip install -r python/requirements.txt
+### 1. Make the hardware safe
+
+1. Unplug the Arduino's USB cable before changing any wires.
+2. Remove wires between the breadboard/resistor and the Arduino. Leave the 1 MΩ resistor out of the circuit. Do not connect a speaker to an Arduino pin.
+3. Connect the Arduino to the computer with USB only. The board can stay connected while the voice plays on the computer.
+
+### 2. Prepare ElevenLabs and Python
+
+1. Install Python 3.10 or later and make sure the Windows `py` launcher is available in Git Bash.
+2. In ElevenLabs, select a Teto voice you are allowed to use and copy its voice ID. Copy your API key too.
+3. In the repository folder, open the existing `.env` file (create it if needed) and add these two lines, replacing the example values:
+   ```text
+   ELEVENLABS_API_KEY=your_api_key
+   ELEVENLABS_VOICE_ID=your_voice_id
    ```
-5. Run the test:
+   Keep `.env` private; do not share it or commit it.
+4. In Git Bash, from the repository root, create a Windows Python environment and install the dependencies:
    ```bash
-   python python/main.py
+   py -m venv .venv-win
+   ./.venv-win/Scripts/python.exe -m pip install -r python/requirements.txt
    ```
 
-The script writes the audio file to `python/generated/teto_test.mp3`. Change `TEST_TEXT` in `python/main.py` to try different wording and punctuation. The output directory is ignored by Git.
+### 3. Upload the LED test and run the speech test
 
-## Safe Uno Q Board Test
-
-The sketch in `sketch/sketch.ino` is an LED-and-Serial test. It does not drive a speaker. The optional `python/pc_audio_test.py` script listens for each LED-flash message and plays a short tone on the Windows computer. Keep the salvaged speaker disconnected; this tests the computer audio and serial timing, not the salvaged speaker.
-
-In Git Bash, from the repository root, compile and upload with:
-
-```bash
-arduino-cli compile --profile uno_q --upload --port COM6 sketch
-```
-
-Replace `COM6` with the Uno Q's port as shown by `arduino-cli board list`. The built-in LED flashes three times, pauses, and repeats. The sketch sends a `FLASH` message at **115200 baud** during each flash.
-
-To hear a matching tone from the Windows computer:
-
-1. Close Arduino IDE Serial Monitor or any other program using the board's COM port. A serial port can only be opened by one program at a time.
-2. Activate the project's Python virtual environment and install dependencies if you have not already:
+1. Connect the Arduino by USB and upload `sketch/sketch.ino` to it. For the Uno Q setup, install/configure the Arduino CLI board support first, then run the following command, replacing `COM6` with the port from `arduino-cli board list`:
    ```bash
-   source .venv/Scripts/activate
-   python -m pip install -r python/requirements.txt
+   arduino-cli compile --profile uno_q --upload --port COM6 sketch
    ```
-3. Run the PC audio listener, replacing `COM6` if your board uses a different port:
+2. Turn your computer volume down to a comfortable level and connect headphones or use the computer speakers.
+3. Run the script with the Arduino's port (the default is `COM6`):
    ```bash
-   python python/pc_audio_test.py --port COM6
+   ./.venv-win/Scripts/python.exe python/main.py --port COM6
    ```
-4. The script opens the serial port (which may restart the sketch), then plays a brief 880 Hz tone through the computer for each `FLASH` message. Raise the computer volume to a comfortable level. Press **Ctrl+C** in Git Bash to stop.
+4. The script asks ElevenLabs for 22.05 kHz PCM audio (`pcm_22050`; unlike Pro-only 44.1 kHz PCM, this format is available on lower tiers), wraps it as a WAV file, saves it as `python\generated\teto_test.wav`, and plays it through the computer. The Arduino's built-in LED turns on while the clip is playing and turns off when playback finishes. To change what Teto says, edit `TEST_TEXT` in `python\main.py`.
 
-If no tone plays, check that the correct COM port is selected, the computer's audio is not muted, the sketch is uploaded, and no other app has the port open. This test plays a generated test tone on the PC; it does not test the salvaged speaker or play ElevenLabs speech.
-
-**Speaker safety:** A series resistor does not make it safe to connect an unidentified speaker directly to a Uno Q GPIO pin. A resistor does not provide the amplifier function or guarantee that either the speaker or the GPIO stays within its electrical limits. Do not connect the speaker to pin 8, GND, 3.3 V, or 5 V. Only test it through an amplifier confirmed to support the speaker's impedance and power requirements; connect the speaker only to the amplifier's speaker outputs, following that amplifier's documentation. Until the speaker and amplifier are identified, use this LED-only sketch and leave the speaker disconnected.
-
-## Current audio boundary
-ElevenLabs generates compressed MP3 audio on the Python side; the Arduino LED test does not decode or play that file. Playing the generated speech through a speaker attached to the Uno Q requires an audio playback route (audio output/DAC and amplifier, or a supported audio playback device) and a decision about whether Python or the microcontroller will handle playback. The current files intentionally keep API generation separate from the simple board test.
+Keep the Arduino connected and do not open Arduino IDE Serial Monitor while the test script is running; only one program can use the COM port at a time. The Arduino LED indicates speech playback but does not play audio itself.

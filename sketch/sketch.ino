@@ -1,19 +1,21 @@
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
   Serial.begin(115200);
-  Serial.println("Teto'Clock safe board test starting.");
-  Serial.println("Speaker output is disabled. Keep the speaker disconnected.");
+  Serial.println("Teto'Clock speech indicator ready.");
 }
 
 void loop() {
-  Serial.println("LED and PC audio test: three flashes.");
-  for (int flash = 0; flash < 3; flash++) {
-    Serial.println("FLASH");
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(250);
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(250);
+  if (Serial.available() > 0) {
+    String command = Serial.readStringUntil('\n');
+    command.trim();
+
+    if (command == "PING") {
+      Serial.println("READY");
+    } else if (command == "SPEAKING") {
+      digitalWrite(LED_BUILTIN, HIGH);
+    } else if (command == "IDLE") {
+      digitalWrite(LED_BUILTIN, LOW);
+    }
   }
-  Serial.println("Test complete. Repeating in 2 seconds.");
-  delay(2000);
 }

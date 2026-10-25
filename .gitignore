@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 venv/
 .venv/
+.venv-win/
 .env
 python/generated/
 
