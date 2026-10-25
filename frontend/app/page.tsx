@@ -142,7 +142,7 @@ export default function HomePage() {
             <img className="brand-mark" src="/teto-logo.png" alt="" />
             <img className="brand-wordmark" src="/teto-wordmark-dark.png" alt="" />
           </Link>
-          <p>Full Steam Ahead: It's TETO'Clock!</p>
+          <p className="footer-tagline">Full Steam Ahead: It's TETO'Clock!</p>
           <nav aria-label="Footer navigation">
             <a href="#about">About</a>
             <a href="#acknowledgements">Acknowledgements</a>
@@ -151,9 +151,9 @@ export default function HomePage() {
           </nav>
         </div>
         <div className="footer-bottom">
-          <span>© 2026  TETO&apos;Clock. TetoNation forever!</span>
+          <span>2026&nbsp;&nbsp;©&nbsp;&nbsp;TETO&apos;Clock. TetoNation forever!</span>
           <a
-            className="font-attribution"
+            className="font-attribution footer-font-credit"
             href="https://fontstruct.com/fontstructions/show/2704514"
             target="_blank"
             rel="noreferrer"

@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Righteous&display=swap");
 
 :root {
   --wine: #480000;
@@ -10,6 +10,7 @@
   --paper: #fbf8f5;
   --muted: #807471;
   --font: "EB Garamond", Garamond, Georgia, serif;
+  --display-font: "Righteous", sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -74,6 +75,10 @@ button, a, select, input { -webkit-tap-highlight-color: transparent; }
 .site-header--solid .auth-signup { color: var(--red-deep); border-color: #dbc5c0; }
 .auth-signup:hover { color: var(--wine); background: #fff; }
 .site-header--solid .auth-signup:hover { color: #fff; background: var(--wine); }
+.nav-link, .nav-cta, .auth-link, .auth-signup,
+.button, .text-link, .scroll-cue, .footer-top nav {
+  font-family: var(--display-font);
+}
 
 .hero {
   position: relative;
@@ -89,11 +94,11 @@ button, a, select, input { -webkit-tap-highlight-color: transparent; }
 .hero::before { position: absolute; inset: 0; background: rgb(30 0 0 / 34%); content: ""; }
 .hero-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgb(31 0 0 / 46%), rgb(72 0 0 / 28%) 50%, rgb(20 0 0 / 48%)); }
 .hero-content { position: relative; z-index: 1; width: min(1000px, 88%); margin-top: 35px; text-align: center; }
-.eyebrow { margin: 0 0 14px; color: var(--red); font-size: 16px; font-weight: 600; letter-spacing: .05em; }
+.eyebrow { margin: 0 0 14px; color: var(--red); font-family: var(--display-font); font-size: 16px; font-weight: 400; letter-spacing: .05em; }
 .hero-eyebrow { color: #fff; font-size: 14px; letter-spacing: .18em; }
 .hero h1 { margin: 0; font-size: clamp(62px, 7vw, 94px); font-weight: 400; letter-spacing: -.05em; line-height: .93; }
 .hero h1 span, .hero h1 strong { display: block; }
-.hero h1 span { margin-bottom: 7px; font-size: .53em; font-weight: 400; letter-spacing: -.025em; }
+.hero h1 span { margin-bottom: 7px; font-family: var(--font); font-size: .53em; font-weight: 400; letter-spacing: -.025em; }
 .hero h1 strong { font-weight: 500; white-space: nowrap; }
 .hero-wordmark { display: inline-block; width: auto; height: .7em; max-width: 58vw; vertical-align: -.04em; }
 .hero-pear { display: inline-block; width: auto; height: .82em; max-width: .7em; vertical-align: -.12em; }
@@ -115,14 +120,14 @@ button, a, select, input { -webkit-tap-highlight-color: transparent; }
 
 .section-wrap { position: relative; width: min(1120px, 85%); margin: 0 auto; }
 .story-section { min-height: 440px; padding: 96px 0 108px; }
-.section-kicker { display: flex; align-items: center; gap: 12px; color: var(--red-deep); font-size: 12px; font-weight: 600; letter-spacing: .16em; }
+.section-kicker { display: flex; align-items: center; gap: 12px; color: var(--red-deep); font-family: var(--display-font); font-size: 12px; font-weight: 400; letter-spacing: .16em; }
 .section-kicker span { color: #a69894; font-size: 11px; }
 .story-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12%; margin-top: 68px; }
 .story-grid h2, .gallery-heading h2 { margin: 0; font-size: clamp(52px, 6vw, 76px); font-weight: 400; letter-spacing: -.045em; line-height: .98; }
 .story-grid h2 em, .gallery-heading h2 em { color: var(--red-deep); font-weight: 400; }
 .story-grid .eyebrow { margin-bottom: 16px; }
 .section-copy { max-width: 485px; align-self: center; color: #615754; font-size: 19px; line-height: 1.65; }
-.section-copy p { margin: 0 0 16px; }
+.section-copy p { margin: 0 0 16px; font-family: var(--font); }
 .text-link { display: inline-flex; align-items: center; gap: 12px; margin-top: 11px; padding-bottom: 6px; color: var(--red-deep); border-bottom: 1px solid #c89b94; font-size: 17px; }
 .text-link:hover { color: var(--red-hot); border-color: var(--red-hot); }
 .project-image { display: block; width: 100%; height: clamp(320px, 38vw, 460px); margin-top: 28px; object-fit: cover; object-position: center 55%; border-radius: 12px; }
@@ -135,17 +140,17 @@ button, a, select, input { -webkit-tap-highlight-color: transparent; }
 .section-kicker--light span { color: #db928c; }
 .thanks-panel .eyebrow { margin-top: 52px; color: #efaaa4; }
 .thanks-panel h2 { margin: 0; font-size: clamp(48px, 5.6vw, 72px); font-weight: 400; letter-spacing: -.045em; line-height: .98; }
-.thanks-copy { max-width: 450px; margin: 25px 0 14px; color: #f3dedd; font-size: 18px; line-height: 1.55; }
+.thanks-copy { max-width: 450px; margin: 25px 0 14px; color: #f3dedd; font-family: var(--font); font-size: 18px; line-height: 1.55; }
 .signature { color: #f2b5ae; font-size: 17px; font-style: italic; }
 .gallery-section { padding: 100px 0 110px; }
 .gallery-heading { display: flex; align-items: end; justify-content: space-between; gap: 50px; margin: 43px 0 42px; }
 .gallery-heading .eyebrow { margin-bottom: 14px; }
-.gallery-intro { max-width: 380px; margin: 0 0 5px; color: #716561; font-size: 19px; line-height: 1.5; }
+.gallery-intro { max-width: 380px; margin: 0 0 5px; color: #716561; font-family: var(--display-font); font-size: 19px; line-height: 1.5; opacity: .9; }
 .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .gallery-video { position: relative; overflow: hidden; aspect-ratio: 16 / 9; background: #190808; }
 .gallery-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-.gallery-card h3 { margin: 16px 0 3px; font-size: 24px; font-weight: 500; }
-.gallery-card .gallery-artist { margin: 0; color: var(--muted); font-size: 14px; }
+.gallery-card h3 { margin: 16px 0 3px; font-family: var(--display-font); font-size: 24px; font-weight: 400; }
+.gallery-card .gallery-artist { margin: 0; color: var(--muted); font-family: var(--display-font); font-size: 14px; opacity: .9; }
 .gallery-link { margin-top: 33px; }
 .site-footer { padding: 34px 7.2% 20px; color: #fff; background: #190808; }
 .footer-top { display: flex; align-items: center; justify-content: space-between; gap: 30px; padding-bottom: 30px; }
@@ -162,7 +167,7 @@ button, a, select, input { -webkit-tap-highlight-color: transparent; }
 .dashboard-heading .eyebrow { margin-bottom: 8px; }
 .dashboard-heading h1 { margin: 0; font-size: clamp(52px, 6vw, 72px); font-weight: 400; letter-spacing: -.045em; line-height: 1; }
 .dashboard-heading h1 em { color: var(--red-deep); font-weight: 400; }
-.dashboard-intro { max-width: 380px; margin: 0; color: #746763; font-size: 19px; text-align: right; }
+.dashboard-intro { max-width: 380px; margin: 0; color: #746763; font-family: var(--font); font-size: 16px; text-align: right; }
 .device-status { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 5px; padding: 8px 12px; color: #746763; background: #fff; border: 1px solid #ebe2de; font-size: 14px; }
 .status-dot, .demo-pill span { width: 7px; height: 7px; background: #d99a3e; border-radius: 50%; }
 .dashboard-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 7fr); align-items: start; gap: 21px; }
@@ -173,9 +178,9 @@ button, a, select, input { -webkit-tap-highlight-color: transparent; }
 .field-hint code { overflow-wrap: anywhere; }
 .card-heading { display: flex; align-items: start; justify-content: space-between; gap: 15px; margin-bottom: 25px; }
 .card-heading .eyebrow { margin-bottom: 4px; font-size: 11px; }
-.card-heading h2 { margin: 0; font-size: 31px; font-weight: 500; letter-spacing: -.025em; }
+.card-heading h2 { margin: 0; font-family: var(--display-font); font-size: 31px; font-weight: 400; letter-spacing: -.025em; }
 .card-icon { width: 26px; height: 26px; color: var(--red); }
-.field-label { display: block; margin-bottom: 8px; color: #362927; font-size: 16px; font-weight: 600; }
+.field-label { display: block; margin-bottom: 8px; color: #362927; font-family: var(--display-font); font-size: 14px; font-weight: 400; }
 .select-wrap, .range-select { position: relative; display: block; }
 .select-wrap select, .range-select select { width: 100%; height: 44px; padding: 0 36px 0 12px; appearance: none; color: var(--ink); background: #fff; border: 1px solid #e3d8d4; border-radius: 0; cursor: pointer; }
 .select-wrap > .select-chevron, .range-select > .select-chevron { position: absolute; top: 14px; right: 13px; width: 16px; height: 16px; color: var(--red-deep); pointer-events: none; }
@@ -249,19 +254,19 @@ select:disabled, textarea:disabled, input:disabled, button:disabled { cursor: no
 .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); padding: 0 0 22px; border-bottom: 1px solid #f0e9e5; }
 .stat-item { display: flex; min-width: 0; flex-direction: column; gap: 4px; padding: 0 17px; border-left: 1px solid #f0e9e5; }
 .stat-item:first-child { padding-left: 0; border-left: 0; }
-.stat-label { color: #9b8e89; font-family: Arial, sans-serif; font-size: 9px; letter-spacing: .12em; }
+.stat-label { color: #9b8e89; font-family: var(--display-font); font-size: 9px; letter-spacing: .12em; }
 .stat-item strong { color: var(--wine); font-size: 34px; font-weight: 500; line-height: 1.1; white-space: nowrap; }
 .stat-item strong small { color: #776a65; font-size: 14px; font-weight: 400; }
 .stat-note { overflow: hidden; color: #918580; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
 .chart-heading { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-top: 24px; }
-.chart-heading h3 { margin: 0; font-size: 22px; font-weight: 500; }
+.chart-heading h3 { margin: 0; font-family: var(--display-font); font-size: 22px; font-weight: 400; }
 .chart-heading p { margin: 3px 0 0; color: #958984; font-size: 14px; }
 .range-select { width: 119px; flex-shrink: 0; }
 .range-select select { height: 34px; padding-left: 9px; font-size: 13px; }
 .range-select > .select-chevron { top: 9px; right: 8px; }
 .chart-wrap { position: relative; margin-top: 13px; padding-top: 20px; }
 .chart-axis-label { position: absolute; top: 0; left: 48px; color: #9b8e89; font-family: Arial, sans-serif; font-size: 8px; letter-spacing: .08em; }
-.response-chart { display: block; width: 100%; height: 205px; overflow: visible; }
+.response-chart { display: block; width: 100%; height: 300px; overflow: visible; }
 .chart-gridline { stroke: #f0e9e5; stroke-width: 1; }
 .chart-tick { fill: #9b8e89; font-family: Arial, sans-serif; font-size: 9px; }
 .chart-line { fill: none; stroke: var(--red); stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.5; }

@@ -110,7 +110,6 @@ function ResponseChart({ sessions }: { sessions: AlarmSession[] }) {
         viewBox="0 0 720 238"
         role="img"
         aria-label={`Alarm dismissal times for ${sessions.length} sessions`}
-        preserveAspectRatio="none"
       >
         <defs>
           <linearGradient id="chart-fill" x1="0" x2="0" y1="0" y2="1">
@@ -649,14 +648,13 @@ export default function Dashboard() {
             <strong>{stats.quickest === null ? "—" : formatMinutes(stats.quickest)}<small>{stats.quickest === null ? "" : " min"}</small></strong>
           </div>
           <div className="stat-item">
-            <span className="stat-label">IN RANGE</span>
-            <strong>{stats.count}<small>×</small></strong>
+            <span className="stat-label">TOTAL SESSIONS</span>
+            <strong>{stats.count}</strong>
           </div>
         </div>
         <div className="chart-heading">
           <div>
             <h3>Time To Get Up</h3>
-            <p>From alarm start until you press the clock button.</p>
           </div>
           <label className="range-select">
             <span className="sr-only">Chart time range</span>
