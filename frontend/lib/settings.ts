@@ -1,16 +1,11 @@
 export const DEFAULT_SETTINGS = {
-  song: "Teto's morning mix",
+  song: "Machine Love",
   message_mode: "script",
   message: "Good morning! The train is waiting for you!",
   volume: 68,
 } as const;
 
-export const ALARM_SONGS = [
-  "Teto's morning mix",
-  "Triple Baka (morning edit)",
-  "Showtime! — Teto's pick",
-  "Quiet sunrise",
-] as const;
+export const ALARM_SONGS = ["Machine Love"] as const;
 
 export type ClockSettings = {
   song: string;

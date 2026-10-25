@@ -1,5 +1,6 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
+import RouteTransition from "../components/RouteTransition";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ClerkProvider>
-          {children}
+          <RouteTransition>{children}</RouteTransition>
         </ClerkProvider>
       </body>
     </html>
