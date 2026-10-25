@@ -1,9 +1,12 @@
 # TETO'Clock
+Afraid of oversleeping on a special occasion, like a hackathon? It's time to say goodbye to multiple alarms… because it's TetO'Clock!
 
-TETO'Clock combines an Arduino UNO Q, a Windows PC companion, and a Next.js dashboard. Sign in, pair each USB-connected clock with its own name and history, save alarm preferences per device, and chart how long it takes to dismiss an alarm.
+TetO'Clock forces lazy sleepers to actually get up from bed, and vigorously aim for our Kasane Teto-inspired steam train alarm clock. She'll make sure you won't go back to sleep... and turn your easy morning into an annoying, but active challenge with intention and meaning.
+
+# About
+[TETO'Clock](https://www.tetoclock.us) is a Kasane Teto-inspired alarm-clock project: a physical UNO Q clock, a companion running on the USB-connected PC, and a website for pairing clocks and viewing wake-up history. The site introduces the project and links to **My TetoClock**, where signed-in users manage their clocks and alarm settings.
 
 ## What runs where
-
 | Component | Purpose |
 | --- | --- |
 | `frontend/` | Next.js website, Clerk sign-in, server-side API routes, and TigerData access. |
@@ -12,17 +15,25 @@ TETO'Clock combines an Arduino UNO Q, a Windows PC companion, and a Next.js dash
 | `sketch/sketch.ino` | Runs the LCD clock, knob-based time/alarm setting, D10 tone melody, D7 fan control, and D9 dismiss switch on the UNO Q microcontroller. |
 | `python/elevenlabs_api.py` | Generates speech using the ElevenLabs credentials in the repository-root `.env`. |
 | `python/main.py` | Optional utility that generates a WAV without running the hardware companion. |
-| `python/tests/speech_test.py` | Optional older one-shot speech and hardware test; it is separate from the account-paired dashboard companion. |
+| `python/tests/speech_test.py` | Optional one-shot ElevenLabs speech and board-output test, separate from the account-paired dashboard companion. |
 | `frontend/migrations/0001_initial.sql` | Creates the database tables for paired devices, preferences, pairing codes, and alarm sessions. |
 
 The Arduino sketch keeps the clock, melody, fan, and switch running locally while the board is powered, even without a PC. The clock time resets when the board loses power. ElevenLabs speech requires the USB-connected Windows PC, network access, and the running companion. The browser never connects directly to the Arduino or TigerData.
 
-## Beginner setup: install the tools
+## Use the live website
+Visit [tetoclock.us](https://www.tetoclock.us) for the public project homepage. It introduces the Teto-inspired alarm-clock concept, thanks SBUHacks and the NJIT community, and features a Kasane Teto song gallery. **Pair My TetoClock**, **Try TetoClock!**, and **My TetoClock** lead to the dashboard; sign in or create an account to manage your own clocks.
 
+In **My TetoClock**, you can:
+- Create a named clock and pair its UNO Q using the displayed one-time code.
+- Choose **Machine Love**, enter **Exact Words** for Teto, set **Alarm Volume**, and save settings for the selected clock.
+- View **Wake-Up History**, including average and quickest dismissal times, the session count in the selected range, and the **Time To Get Up** chart. The chart can show the latest 12 sessions or 7 days and refreshes every 10 seconds.
+
+The dashboard also presents a **Vibe Prompt** option, but the current PC companion only generates speech from **Exact Words**. Selecting a vibe prompt does not make it speak; use Exact Words for a working voice alarm. The generated voice plays through the companion PC's audio output, while the clock melody and fan run locally on the board.
+
+## Beginner setup: install the tools
 Use **Windows PowerShell** in VS Code. Whenever these steps say “project folder,” they mean the folder containing `README.md`.
 
 ### 1. Install Node.js and npm
-
 1. Download the **LTS** Windows installer from [nodejs.org](https://nodejs.org/en/download/). npm is included with Node.js; you do not install it separately.
 2. Run the installer with the default options, including the option to add Node.js to PATH.
 3. Close and reopen VS Code.
@@ -36,7 +47,6 @@ Use **Windows PowerShell** in VS Code. Whenever these steps say “project folde
    Both commands should print version numbers. If PowerShell says that a command is not recognized, restart Windows and try again.
 
 ### 2. Install Python
-
 1. Download Python 3.10 or later from [python.org/downloads](https://www.python.org/downloads/).
 2. On the first installer screen, select **Add python.exe to PATH**, then install Python.
 3. Close and reopen VS Code. In a new PowerShell terminal, check:
@@ -48,7 +58,6 @@ Use **Windows PowerShell** in VS Code. Whenever these steps say “project folde
    If `py` is not recognized, reinstall Python and select **Add python.exe to PATH**.
 
 ### 3. Create and use a Python virtual environment
-
 A virtual environment (`venv`) keeps this project’s Python packages separate from other projects. Open PowerShell in the project folder and run:
 
 ```powershell
@@ -67,7 +76,6 @@ python --version
 If PowerShell refuses to run the activation script, skip activation and keep using `.venv\Scripts\python.exe`. No execution-policy change is needed.
 
 ### 4. Install Arduino CLI and check the board
-
 1. Follow the official [Arduino CLI installation guide](https://arduino.github.io/arduino-cli/installation/) for Windows.
 2. Connect the UNO Q to the PC with a USB **data** cable, reopen the terminal, and check:
 
@@ -85,7 +93,6 @@ If PowerShell refuses to run the activation script, skip activation and keep usi
 The board’s upload port (for example, `COM6`) is for uploading the sketch. ADB is used separately to communicate with the UNO Q App Lab application.
 
 ## Environment files: exactly what to keep
-
 There are **two real credential files** for local development:
 
 1. **`<project folder>\.env`** — ElevenLabs credentials for the Windows Python companion and speech utility. It should contain:
@@ -113,7 +120,6 @@ There are **two real credential files** for local development:
 Never paste credentials into chat or commit credential files to Git. The project ignores the root `.env`, `frontend\.env.local`, and the redundant TigerData filename.
 
 ## Set up your own Clerk application
-
 The project contains Clerk development authentication setup. To use keys from your own Clerk application:
 
 1. Open the [Clerk Dashboard](https://dashboard.clerk.com/) and create or select an application.
@@ -126,7 +132,6 @@ The project contains Clerk development authentication setup. To use keys from yo
 The app already has Clerk middleware and `/sign-in` and `/sign-up` pages. The signed-in account owns its paired clocks and data.
 
 ## Set up TigerData and create the tables
-
 Tiger Cloud is PostgreSQL with time-series features.
 
 1. Sign in to [Tiger Cloud Console](https://console.cloud.tigerdata.com/) and create a service. Review its plan and pricing.
@@ -157,6 +162,7 @@ The migration creates:
 The server uses `TIMESCALE_SERVICE_URL` if set, or the individual `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`, and `PGSSLMODE` variables. Database access stays in server-side Next.js API routes; the website never exposes the database password to the browser.
 
 ## Run the website locally
+The production site is already available at [tetoclock.us](https://www.tetoclock.us); you do not need to run a local server just to visit the project website. To develop the site from this repository, start a local server:
 
 From PowerShell at the project root:
 
@@ -166,16 +172,14 @@ npm install
 npm run dev
 ```
 
-Open the local URL printed in the terminal, usually `http://localhost:3000`. Create an account or sign in, then choose **My TetoClock**. Stop the dev server with `Ctrl+C`.
+Open `http://localhost:3000`. Create an account or sign in, then choose **My TetoClock**. Stop the dev server with `Ctrl+C`.
 
 `npm install` downloads frontend packages from `frontend\package-lock.json`. You generally need to run it once after cloning the project or after package dependencies change.
 
 ## Connect and pair a physical clock
-
 Each board is registered as its own clock using its USB/ADB serial. A one-time pairing code associates that board with the signed-in user.
 
 ### 1. Wire and upload the sketch
-
 1. Disconnect board power before wiring.
 2. Wire the LCD: RS to D12, E to D11, D4 to D5, D5 to D4, D6 to D3, D7 to D2, and K to D6. Check the display module's backlight current requirements; add a current-limiting resistor if it does not already include one.
 3. Connect the normally-open momentary dismiss switch between D9 and GND. The sketch uses `INPUT_PULLUP`; the switch does not need an external supply.
@@ -188,7 +192,6 @@ Each board is registered as its own clock using its USB/ADB serial. A one-time p
    ```
 
 ### 2. Generate a pairing code and pair over USB
-
 1. Start the website with `npm run dev` from the `frontend` folder, sign in, then open **My TetoClock**.
 2. Enter a clock name, such as `Bedroom clock`, then choose **Generate pairing code**.
 3. Connect that UNO Q to the PC running the Python companion. Confirm it appears in ADB:
@@ -212,7 +215,6 @@ Each board is registered as its own clock using its USB/ADB serial. A one-time p
 If more than one UNO Q is connected, add `--adb-serial SERIAL_FROM_ADB_DEVICES` to the pairing command. Each board must be paired separately.
 
 ### 3. Run an alarm and record its response time
-
 1. Select the clock in the dashboard.
 2. Choose its alarm options and exact words for Teto, then choose **Save settings**.
 3. In the PowerShell terminal on the PC connected to that clock, run the dashboard’s alarm command. It looks like:
@@ -228,7 +230,6 @@ If more than one UNO Q is connected, add `--adb-serial SERIAL_FROM_ADB_DEVICES` 
 The companion waits for the board's scheduled alarm; the board starts its tone and fan locally and keeps them on until D9 is pressed. Its software clock is not battery-backed, so set the time again after a power loss.
 
 ## Quick full test from Git Bash
-
 Run these steps from the project root (the folder containing this README). Use three Git Bash terminals: one for the website, one for Python/ElevenLabs, and one for the board commands.
 
 1. Start the website. In Terminal 1:
@@ -296,7 +297,6 @@ Run these steps from the project root (the folder containing this README). Use t
 If the standalone ElevenLabs test passes but step 6 or 7 fails, the API itself works; use the exact companion error to diagnose the ADB/bridge or audio-playback path. If the standalone test fails, debug that first rather than the Arduino sketch.
 
 ## Use the app in production with Vercel
-
 The frontend uses server-side API routes, so it cannot use static export.
 
 1. Import the repository into Vercel and set the project’s **Root Directory** to `frontend`.
@@ -317,13 +317,11 @@ Vercel cannot access USB devices connected to your home PC. Keep the Windows PC 
 The ElevenLabs credentials are used by the **local Windows companion**, so keep them in the root `.env`; they do not need to be copied to Vercel for this version.
 
 ## What is supported and what is not
-
 - Supported: local clock and scheduled alarm, LCD/knob time setting, original repeating tone pattern and fan operation without a PC, optional exact-text ElevenLabs speech from the connected PC companion, physical switch dismissal, and per-device TigerData history.
 - Not yet supported: persistent real-time clock across power loss, song-file playback through the tone output, and generating speech from the vibe prompt.
 - If a clock is removed in the dashboard, its companion token is revoked. Pair it again to reconnect it.
 
 ## Optional or legacy files (not deleted)
-
 These remain in the repository and are **not required for the normal website-plus-companion setup**:
 
 - Root `package-lock.json`: a leftover npm lockfile with no matching root `package.json`; frontend dependencies are managed by `frontend\package.json` and `frontend\package-lock.json`.
@@ -334,7 +332,6 @@ These remain in the repository and are **not required for the normal website-plu
 No non-environment extras were deleted or moved.
 
 ## Troubleshooting
-
 | Problem | What to check |
 | --- | --- |
 | `node` or `npm` is not recognized | Install Node.js LTS, close/reopen VS Code, then try `node --version` and `npm --version`. |
