@@ -1,0 +1,3 @@
+name: TETO Clock Bridge
+icon: 🔴
+description: Receives speech timing commands from the PC and forwards them to the Uno Q sketch.

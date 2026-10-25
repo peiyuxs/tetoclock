@@ -2,7 +2,9 @@ profiles:
   uno_q:
     fqbn: arduino:zephyr:unoq
     platforms:
-      - platform: arduino:zephyr (1.0.0)
+      - platform: arduino:zephyr (0.52.0)
     libraries:
-      # Add your Arduino libraries here as you need them
-      - LiquidCrystal_I2C
+      - MsgPack (0.4.2)
+      - DebugLog (0.8.4)
+      - ArxContainer (0.7.0)
+      - ArxTypeTraits (0.3.2)
