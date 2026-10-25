@@ -16,3 +16,11 @@ Thumbs.db
 
 # Uno Q build artifacts
 build/
+
+# Next.js frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+frontend/.env.*.local
+frontend/tiger-cloud-tetoclock-credentials.env
