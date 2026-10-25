@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -29,6 +36,19 @@ export default function SiteNav() {
       <Link className="nav-cta" href="/my-tetoclock">
         Wake up with Teto <span aria-hidden="true">↗</span>
       </Link>
+      <div className="auth-controls">
+        <SignedOut>
+          <SignInButton mode="modal">
+            <button className="auth-link" type="button">Sign in</button>
+          </SignInButton>
+          <SignUpButton mode="modal">
+            <button className="auth-signup" type="button">Create account</button>
+          </SignUpButton>
+        </SignedOut>
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+      </div>
     </header>
   );
 }

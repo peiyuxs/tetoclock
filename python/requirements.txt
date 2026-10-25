@@ -1,2 +1,4 @@
 elevenlabs
 python-dotenv
+keyring>=25.6,<26
+pygame>=2.6.1,<3

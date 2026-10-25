@@ -11,7 +11,7 @@ export default function DashboardPage() {
             <p className="eyebrow">Your morning, your rules</p>
             <h1>My <em>TetoClock</em></h1>
             <p className="dashboard-intro">
-              Tune your wake-up call and see how quickly you&apos;re out of bed.
+              Manage each connected clock, its wake-up settings, and your alarm history.
             </p>
           </div>
           <div className="device-status">
@@ -23,7 +23,7 @@ export default function DashboardPage() {
       </main>
       <footer className="dashboard-footer">
         <span>© 2026 TETO&apos;Clock</span>
-        <span>Your data stays in this browser demo.</span>
+        <span>Clock data is private to your signed-in account.</span>
       </footer>
     </>
   );
