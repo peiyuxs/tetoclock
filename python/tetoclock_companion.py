@@ -18,7 +18,7 @@ from uno_q_bridge import UnoQBridge, find_adb
 
 
 KEYRING_SERVICE = "TETO'Clock"
-MAX_ALARM_DURATION_SECONDS = 120
+MAX_SPEECH_DURATION_SECONDS = 120
 
 
 def api_base_url(argument: str | None) -> str:
@@ -158,14 +158,14 @@ def run_alarm(args: argparse.Namespace) -> None:
         raise RuntimeError("This clock has an invalid volume setting.")
 
     clip = generate_speech(text)
-    if not 0 < clip.duration_ms <= MAX_ALARM_DURATION_SECONDS * 1000:
+    if not 0 < clip.duration_ms <= MAX_SPEECH_DURATION_SECONDS * 1000:
         raise RuntimeError("The generated voice clip must be 120 seconds or shorter.")
 
     try:
         import pygame
     except ImportError as error:
         raise RuntimeError(
-            "pygame is required for looping alarm playback. Install python/requirements.txt."
+            "pygame is required for alarm speech playback. Install python/requirements.txt."
         ) from error
 
     bridge = UnoQBridge(find_adb(args.adb_path), args.adb_serial)
@@ -179,28 +179,28 @@ def run_alarm(args: argparse.Namespace) -> None:
     audio_started = False
     mixer_started = False
     dismissed_at: datetime | None = None
-    alarm_started_at = datetime.now(timezone.utc)
+    alarm_started_at: datetime | None = None
 
     try:
-        bridge.send_command("START", MAX_ALARM_DURATION_SECONDS * 1000)
-        pygame.mixer.init(frequency=22050, size=-16, channels=1)
-        mixer_started = True
-        pygame.mixer.music.load(str(clip.path))
-        pygame.mixer.music.set_volume(volume / 100)
-        pygame.mixer.music.play(-1)
-        audio_started = True
-        alarm_started_at = datetime.now(timezone.utc)
-        print("Alarm is ringing. Press the clock's physical dismiss button to stop it.")
-
-        deadline = time.monotonic() + MAX_ALARM_DURATION_SECONDS
-        while time.monotonic() < deadline:
-            if bridge.send_command("POLL") == "DISMISSED":
+        print("Companion is armed. Waiting for the clock's alarm.")
+        while dismissed_at is None:
+            status = bridge.send_command("POLL")
+            if status == "ALARM" and alarm_started_at is None:
+                alarm_started_at = datetime.now(timezone.utc)
+                pygame.mixer.init(frequency=22050, size=-16, channels=1)
+                mixer_started = True
+                pygame.mixer.music.load(str(clip.path))
+                pygame.mixer.music.set_volume(volume / 100)
+                pygame.mixer.music.play()
+                audio_started = True
+                print("Alarm is ringing. Press the clock's physical switch to stop it.")
+            elif status == "DISMISSED":
                 dismissed_at = datetime.now(timezone.utc)
-                break
-            time.sleep(0.2)
+            else:
+                time.sleep(0.2)
 
-        if dismissed_at is None:
-            raise TimeoutError("The alarm reached the 120-second hardware safety limit.")
+        if alarm_started_at is None or dismissed_at is None:
+            raise RuntimeError("The clock reported dismissal without an alarm start.")
     finally:
         try:
             if audio_started:
@@ -210,10 +210,7 @@ def run_alarm(args: argparse.Namespace) -> None:
                 if mixer_started:
                     pygame.mixer.quit()
             finally:
-                try:
-                    bridge.send_command("STOP")
-                finally:
-                    bridge.stop_app()
+                bridge.stop_app()
 
     session_id = str(uuid.uuid4())
     request_json(

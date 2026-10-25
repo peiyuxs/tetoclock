@@ -2,8 +2,11 @@ profiles:
   uno_q:
     fqbn: arduino:zephyr:unoq
     platforms:
-      - platform: arduino:zephyr (0.52.0)
+      - platform: arduino:zephyr (1.0.0)
     libraries:
+      - Arduino_RouterBridge (0.4.3)
+      - Arduino_RPClite (0.3.0)
+      - LiquidCrystal (1.0.7)
       - MsgPack (0.4.2)
       - DebugLog (0.8.4)
       - ArxContainer (0.7.0)
