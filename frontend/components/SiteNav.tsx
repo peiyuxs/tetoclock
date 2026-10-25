@@ -7,6 +7,7 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
+import Icon from "./Icon";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -17,8 +18,8 @@ export default function SiteNav() {
   return (
     <header className={`site-header${dashboard ? " site-header--solid" : ""}`}>
       <Link className="brand" href="/" aria-label="TETO'Clock home">
-        <span className="brand-mark" aria-hidden="true" />
-        <span>TETO&apos;Clock</span>
+        <img className="brand-mark" src="/teto-logo.png" alt="" />
+        <span className="brand-name"><span className="brand-name-highlight">TETO</span>&apos;Clock</span>
       </Link>
       <div className="header-actions">
         <nav className="main-nav" aria-label="Main navigation">
@@ -27,7 +28,7 @@ export default function SiteNav() {
           </Link>
         </nav>
         <Link className="nav-cta" href="/my-tetoclock">
-          My TetoClock <span aria-hidden="true">↗</span>
+          My TetoClock <Icon name="arrow-up-right" />
         </Link>
         <div className="auth-controls">
           <SignedOut>

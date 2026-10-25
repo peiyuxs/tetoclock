@@ -3,6 +3,7 @@
 import { SignInButton, useAuth } from "@clerk/nextjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { CSSProperties, FormEvent } from "react";
+import Icon from "./Icon";
 
 type AlarmSettings = {
   song: string;
@@ -34,7 +35,7 @@ const HISTORY_POLL_INTERVAL_MS = 10_000;
 const DEFAULT_SETTINGS: AlarmSettings = {
   song: "Machine Love",
   messageMode: "script",
-  message: "Good morning! The train is waiting for you!",
+  message: "Full steam ahead... It's Teto-O'Clock!",
   volume: 68,
 };
 
@@ -373,11 +374,10 @@ export default function Dashboard() {
   if (signedOut) {
     return (
       <div className="sign-in-panel panel">
-        <p className="eyebrow">Your private dashboard</p>
-        <h2>Sign in to see your clocks</h2>
-        <p>Your devices, alarm preferences, and history are saved to your account.</p>
+        <h2>Sign in to pair your first TetO'Clock!</h2>
+        <p>All of your devices, settings, and history are saved to your account.</p>
         <SignInButton mode="modal">
-          <button className="button button--primary" type="button">Sign in to continue</button>
+          <button className="button button--primary" type="button">Sign In</button>
         </SignInButton>
       </div>
     );
@@ -394,7 +394,7 @@ export default function Dashboard() {
           <div>
               <h2>My Clocks</h2>
           </div>
-          <span className="card-icon" aria-hidden="true">✳</span>
+          <Icon className="card-icon" name="sparkle" />
         </div>
 
         {clocks.length > 0 && (
@@ -410,7 +410,7 @@ export default function Dashboard() {
                   <option key={clock.id} value={clock.id}>{clock.name}</option>
                 ))}
               </select>
-              <span aria-hidden="true">⌄</span>
+              <Icon className="select-chevron" name="chevron-down" />
             </div>
             <p className="field-hint">
               USB / ADB serial: <code>{selectedClock?.deviceSerial}</code>
@@ -546,7 +546,7 @@ export default function Dashboard() {
           <div>
             <h2>Alarm Settings</h2>
           </div>
-          <span className="card-icon" aria-hidden="true">♫</span>
+          <Icon className="card-icon" name="music" />
         </div>
         <form onSubmit={saveSettings}>
           <label className="field-label" htmlFor="song">Alarm Song</label>
@@ -558,7 +558,7 @@ export default function Dashboard() {
             >
               <option>Machine Love</option>
             </select>
-            <span aria-hidden="true">⌄</span>
+            <Icon className="select-chevron" name="chevron-down" />
           </div>
 
           <fieldset className="voice-fieldset" disabled={!selectedClock}>
@@ -619,7 +619,7 @@ export default function Dashboard() {
           <div className="range-ends"><span>QUIET</span><span>LOUD</span></div>
           <div className="form-actions">
             <button className="button button--primary" type="submit" disabled={!selectedClock || saving}>
-              {saving ? "Saving…" : saved ? "Saved ✓" : "Save settings"}
+              {saving ? "Saving…" : saved ? <>Saved <Icon className="save-check" name="check" /></> : "Save settings"}
             </button>
           </div>
           <p
@@ -664,7 +664,7 @@ export default function Dashboard() {
               <option>12 sessions</option>
               <option>7 days</option>
             </select>
-            <span aria-hidden="true">⌄</span>
+            <Icon className="select-chevron" name="chevron-down" />
           </label>
         </div>
         <ResponseChart sessions={sessions} />
@@ -681,7 +681,7 @@ export default function Dashboard() {
                 : ""}
         </p>
         <div className="data-note">
-          <span aria-hidden="true">ⓘ</span>
+          <Icon className="data-note-icon" name="info" />
           {selectedClock
             ? `Showing only ${selectedClock.name}. Each saved session is connected to your TetoClock's USB/ADB identity.`
             : "Connect a clock and dismiss an alarm to see its time-series history."}

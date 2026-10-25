@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Icon from "../components/Icon";
 import SiteNav from "../components/SiteNav";
 
 const galleryCards = [
@@ -30,10 +31,10 @@ export default function HomePage() {
         <section className="hero" id="top" aria-labelledby="hero-title">
           <div className="hero-shade" />
           <div className="hero-ornament hero-ornament--left" aria-hidden="true">
-            ✳
+            <Icon name="sparkle" />
           </div>
           <div className="hero-ornament hero-ornament--right" aria-hidden="true">
-            ✳
+            <Icon name="sparkle" />
           </div>
           <div className="hero-content">
             <h1 id="hero-title">
@@ -47,7 +48,7 @@ export default function HomePage() {
               because it&apos;s TetO&apos;Clock!
             </p>
             <Link className="button button--light" href="/my-tetoclock">
-              Pair My TetoClock <span aria-hidden="true">→</span>
+              Pair My TetoClock <Icon name="arrow-right" />
             </Link>
           </div>
           <a className="scroll-cue" href="#about">
@@ -75,7 +76,7 @@ export default function HomePage() {
                 TetO'Clock forces lazy sleepers to actually get up from bed, and vigorously aim for our Kasane Teto-inspired steam train alarm clock. She'll make sure you won't go back to sleep... and turn your easy morning into an annoying, but active challenge with intention and meaning.
               </p>
               <Link className="text-link" href="/my-tetoclock">
-                Try TetoClock! <span aria-hidden="true">↗</span>
+                Try TetoClock! <Icon name="arrow-up-right" />
               </Link>
             </div>
           </div>
@@ -128,15 +129,15 @@ export default function HomePage() {
             target="_blank"
             rel="noreferrer"
           >
-            Find more Teto on YouTube! <span aria-hidden="true">↗</span>
+            Find more Teto on YouTube! <Icon name="arrow-up-right" />
           </a>
         </section>
       </main>
       <footer className="site-footer">
         <div className="footer-top">
           <Link className="brand footer-brand" href="/">
-            <span className="brand-mark" aria-hidden="true" />
-            <span>TETO&apos;Clock</span>
+            <img className="brand-mark" src="/teto-logo.png" alt="" />
+            <span className="brand-name"><span className="brand-name-highlight">TETO</span>&apos;Clock</span>
           </Link>
           <p>Full Steam Ahead: It's TETO'Clock!</p>
           <nav aria-label="Footer navigation">
@@ -148,7 +149,7 @@ export default function HomePage() {
         </div>
         <div className="footer-bottom">
           <span>© 2026  TETO&apos;Clock. TetoNation forever!</span>
-          <a href="#top">Back to top ↑</a>
+          <a href="#top">Back to top <Icon name="arrow-up" /></a>
         </div>
       </footer>
     </>

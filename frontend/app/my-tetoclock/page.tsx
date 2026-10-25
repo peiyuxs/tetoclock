@@ -15,8 +15,7 @@ export default function DashboardPage() {
         <Dashboard />
       </main>
       <footer className="dashboard-footer">
-        <span>© 2026 TETO&apos;Clock</span>
-        <span>Clock data is private to your signed-in account.</span>
+        <span>2026 © TETO&apos;Clock</span>
       </footer>
     </>
   );
